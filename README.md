@@ -6,14 +6,14 @@ The idea is based from the old Courseplay Path Editor that was made for Farming 
 
 Features:
 ================
-Auto detect Farming Simulator 2011/2013 game and savegame folder.
-Automatic get PDA map image from standard game and for mod maps as well.
-Edit currently existing saved courses.
-Create new courses.
-Able to create lanes like the Course Generator do. (Only for FS2013)
-Quick select tools from a right click menu on the map area.
-Mouse scroll zooms the map in and out. (Feature was missing on the old Path editor).
-+ more.
++ Auto detect Farming Simulator 2011/2013 game and savegame folder.
++ Automatic get PDA map image from standard game and for mod maps as well.
++ Edit currently existing saved courses.
++ Create new courses.
++ Able to create lanes like the Course Generator do. (Only for FS2013)
++ Quick select tools from a right click menu on the map area.
++ Mouse scroll zooms the map in and out. (Feature was missing on the old Path editor).
++ And more.....
 
 Installing:
 ================
