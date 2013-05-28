@@ -1,7 +1,7 @@
 Courseplay Editor
 ================
 
-Courseplay Editor is a tool to editing courses from Farming Simulator 2011 and 2013 savegames.
+Courseplay Editor is a tool to editing courses from Farming Simulator 2011 and 2013 savegames.  
 The idea is based from the old Courseplay Path Editor that was made for Farming Simulator 2011, but since it lacks the support of the new features in Courseplay 3.4 for Farming Simulator 2013 and some more user friendly updates for handling the tools, I have decided to make a total new one from scratch, that should be possible to port over to other platforms as well and not only Windows.
 
 Features:
@@ -21,11 +21,5 @@ More info when it's ready for alpha and beta testing.
 
 Credits:
 ----------------
-<table>
-  <tr>
-    <td>C++ coding:</td><td>Claus G. Pedersen aka. Satis</td>
-  </tr>
-  <tr>
-    <td>Icon/images:</td><td>Not totally known yet.</td>
-  </tr>
-</table>
+C++ coding: Claus G. Pedersen aka. Satis  
+Icon/images: Not totally known yet.
