@@ -1,6 +1,6 @@
-/wxmsw294ud_core_vc100.dll
-/wxbase294u_vc100.dll
-/wxbase294ud_vc100.dll
-/wxmsw294u_core_vc100.dll
-
 /Debug
+/Release
+
+/Courseplay Editor.vcxproj.user
+/Courseplay Editor.vcxproj
+/Courseplay Editor.vcxproj.filters

@@ -1,7 +1,7 @@
 #ifndef APPFRAME_H
 #define APPFRAME_H
 
-#define CP_EDITOR_VERSION wxT("0.0.1")
+#define CP_EDITOR_VERSION wxT("0.0.1 Alpha")
 
 #include "wx/wx.h"
 
