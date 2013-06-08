@@ -1,6 +1,7 @@
-/Debug
-/Release
+/bin
+/obj
+/wxsmith
 
-/Courseplay Editor.vcxproj.user
-/Courseplay Editor.vcxproj
-/Courseplay Editor.vcxproj.filters
+/Courseplay Editor.cbp
+/Courseplay Editor.depend
+/Courseplay Editor.layout
