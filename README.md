@@ -15,15 +15,18 @@ Features:
 * Create new courses.
 * Able to create lanes like the Course Generator do. (Only for FS2013)
 * Quick select tools from a right click menu on the map area.
-* Shortcut keys for quick seleft tools.
+* Shortcut keys for quick select tools.
 * Mouse scroll zooms the map in and out. (Feature was missing on the old Path editor).
 * And more.....
 
 ----------------
 Compiling Info:
 ----------------
+Program used:  
+[Code::Block](http://www.codeblocks.org/downloads) For building and compiling
+
 Librarys:  
-1. [wxWidgets](http://www.wxwidgets.org/)  
+1. [wxWidgets](http://www.wxwidgets.org/) Lib must be build for the compiler used!  
 2. [GLI (OpenGL Image)](http://www.g-truc.net/project-0024.html) for converting DDS map files
 
 ----------------
