@@ -48,13 +48,14 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 
 //(*IdInit(Courseplay_EditorFrame)
 const long Courseplay_EditorFrame::ID_TLB1_BTN_NEW = wxNewId();
-const long Courseplay_EditorFrame::ID_BUTTON1 = wxNewId();
 const long Courseplay_EditorFrame::TLB_1 = wxNewId();
 const long Courseplay_EditorFrame::ID_Main_Window = wxNewId();
-const long Courseplay_EditorFrame::ID_COURSELIST = wxNewId();
-const long Courseplay_EditorFrame::ID_BUTTON2 = wxNewId();
-const long Courseplay_EditorFrame::ID_BUTTON3 = wxNewId();
-const long Courseplay_EditorFrame::ID_BUTTON4 = wxNewId();
+const long Courseplay_EditorFrame::ID_COURSELISTBOX = wxNewId();
+const long Courseplay_EditorFrame::BTN_SELECTALLCOURSE = wxNewId();
+const long Courseplay_EditorFrame::BTN_MOVECOURSEUP = wxNewId();
+const long Courseplay_EditorFrame::BTN_MOVECOURSEDOWN = wxNewId();
+const long Courseplay_EditorFrame::ID_STATICTEXT1 = wxNewId();
+const long Courseplay_EditorFrame::TXT_COURSENAME = wxNewId();
 const long Courseplay_EditorFrame::ID_PANEL1 = wxNewId();
 const long Courseplay_EditorFrame::ID_File_Load = wxNewId();
 const long Courseplay_EditorFrame::ID_File_Save = wxNewId();
@@ -74,6 +75,10 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     wxPNGResource res;
     wxBitmap appIcon = res.GetBitmap(wxT("AppIcon"), 16, 16);
 
+    // set default variables
+    courseListSelectedAll   = false;
+    courseListSelectedIndex = -1;
+
     //(*Initialize(Courseplay_EditorFrame)
     wxMenuItem* MenuItem2;
     wxMenuItem* MenuItem1;
@@ -81,28 +86,26 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     wxMenu* Menu1;
     wxBoxSizer* BoxSizer1;
     wxMenuBar* MenuBar1;
+    wxBoxSizer* BoxSizer3;
     wxMenu* Menu2;
 
-    Create(parent, id, _("Courseplay Editor"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE|wxFULL_REPAINT_ON_RESIZE, _T("id"));
-    SetClientSize(wxSize(720,409));
-    SetExtraStyle( GetExtraStyle() | wxFRAME_EX_METAL );
+    Create(parent, wxID_ANY, _("Courseplay Editor"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
+    SetClientSize(wxSize(1066,582));
     {
     	wxIcon FrameIcon;
     	FrameIcon.CopyFromBitmap(appIcon);
     	SetIcon(FrameIcon);
     }
     AuiManager1 = new wxAuiManager(this, wxAUI_MGR_DEFAULT);
-    Aui_Toolbar1 = new wxAuiToolBar(this, TLB_1, wxDefaultPosition, wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
-    Button1 = new wxButton(Aui_Toolbar1, ID_BUTTON1, _("Label"), wxPoint(35,17), wxSize(23,23), 0, wxDefaultValidator, _T("ID_BUTTON1"));
+    Aui_Toolbar1 = new wxAuiToolBar(this, TLB_1, wxPoint(55,48), wxSize(236,24), wxAUI_TB_DEFAULT_STYLE);
     Aui_Toolbar1->AddTool(ID_TLB1_BTN_NEW, _("Add"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, _("Add new waypoint"), _("Add new waypoint to the end of the route"), NULL);
-    Aui_Toolbar1->AddControl(Button1, _("Item label"));
     Aui_Toolbar1->Realize();
-    AuiManager1->AddPane(Aui_Toolbar1, wxAuiPaneInfo().Name(_T("TLB_1")).ToolbarPane().Caption(_("Pane caption")).CloseButton(false).Layer(10).Top().LeftDockable(false).RightDockable(false).Gripper());
+    AuiManager1->AddPane(Aui_Toolbar1, wxAuiPaneInfo().Name(_T("TLB_1")).ToolbarPane().Caption(_("Pane caption")).CloseButton(false).Layer(10).Top().BestSize(wxSize(236,24)).Gripper());
     mainWindow = new wxScrolledWindow(this, ID_Main_Window, wxPoint(367,283), wxDefaultSize, wxSTATIC_BORDER|wxVSCROLL|wxHSCROLL|wxALWAYS_SHOW_SB|wxFULL_REPAINT_ON_RESIZE, _T("ID_Main_Window"));
     AuiManager1->AddPane(mainWindow, wxAuiPaneInfo().Name(_T("mainWindow")).CenterPane().Caption(_("Pane caption")));
-    Panel1 = new wxPanel(this, ID_PANEL1, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_PANEL1"));
+    Panel1 = new wxPanel(this, ID_PANEL1, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER, _T("ID_PANEL1"));
     BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-    courseList = new wxCheckListBox(Panel1, ID_COURSELIST, wxDefaultPosition, wxSize(200,107), 0, 0, wxSTATIC_BORDER|wxVSCROLL|wxALWAYS_SHOW_SB, wxDefaultValidator, _T("ID_COURSELIST"));
+    courseList = new wxCheckListBox(Panel1, ID_COURSELISTBOX, wxDefaultPosition, wxSize(197,124), 0, 0, wxVSCROLL|wxALWAYS_SHOW_SB, wxDefaultValidator, _T("ID_COURSELISTBOX"));
     courseList->Append(_("Course 1"));
     courseList->Append(_("Course 2"));
     courseList->Append(_("Course 3"));
@@ -113,20 +116,30 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     courseList->Append(_("Course 8"));
     courseList->Append(_("Course 9"));
     courseList->Append(_("Course 10"));
-    BoxSizer1->Add(courseList, 1, wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer1->Add(courseList, 1, wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL, 5);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-    Button2 = new wxButton(Panel1, ID_BUTTON2, _("(Un)Select"), wxDefaultPosition, wxSize(62,23), 0, wxDefaultValidator, _T("ID_BUTTON2"));
-    BoxSizer2->Add(Button2, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer2->Add(0,0,1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    Button3 = new wxButton(Panel1, ID_BUTTON3, _("Up"), wxDefaultPosition, wxSize(23,23), 0, wxDefaultValidator, _T("ID_BUTTON3"));
-    BoxSizer2->Add(Button3, 0, wxRIGHT|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-    Button4 = new wxButton(Panel1, ID_BUTTON4, _("Dn"), wxDefaultPosition, wxSize(23,23), 0, wxDefaultValidator, _T("ID_BUTTON4"));
-    BoxSizer2->Add(Button4, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer1->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_LEFT|wxALIGN_TOP, 5);
+    selectAllCourse = new wxButton(Panel1, BTN_SELECTALLCOURSE, _("(Un)Select All"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("BTN_SELECTALLCOURSE"));
+    BoxSizer2->Add(selectAllCourse, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer2->Add(15,20,1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    moveCourseUp = new wxButton(Panel1, BTN_MOVECOURSEUP, _("Up"), wxDefaultPosition, wxSize(23,23), 0, wxDefaultValidator, _T("BTN_MOVECOURSEUP"));
+    moveCourseUp->Disable();
+    BoxSizer2->Add(moveCourseUp, 0, wxRIGHT|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
+    moveCourseDown = new wxButton(Panel1, BTN_MOVECOURSEDOWN, _("Dn"), wxDefaultPosition, wxSize(23,23), 0, wxDefaultValidator, _T("BTN_MOVECOURSEDOWN"));
+    moveCourseDown->Disable();
+    BoxSizer2->Add(moveCourseDown, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer1->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer3 = new wxBoxSizer(wxHORIZONTAL);
+    StaticText1 = new wxStaticText(Panel1, ID_STATICTEXT1, _("Course Name:"), wxDefaultPosition, wxSize(69,16), 0, _T("ID_STATICTEXT1"));
+    BoxSizer3->Add(StaticText1, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    courseName = new wxTextCtrl(Panel1, TXT_COURSENAME, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("TXT_COURSENAME"));
+    courseName->SetMaxLength(20);
+    courseName->Disable();
+    BoxSizer3->Add(courseName, 1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer1->Add(BoxSizer3, 0, wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     Panel1->SetSizer(BoxSizer1);
     BoxSizer1->Fit(Panel1);
     BoxSizer1->SetSizeHints(Panel1);
-    AuiManager1->AddPane(Panel1, wxAuiPaneInfo().Name(_T("PaneName")).DefaultPane().Caption(_("Course List")).CloseButton(false).Right().TopDockable(false).BottomDockable(false).Resizable(false));
+    AuiManager1->AddPane(Panel1, wxAuiPaneInfo().Name(_T("PaneName")).DefaultPane().Caption(_("Course List")).CloseButton(false).Right().Resizable(false));
     AuiManager1->Update();
     MenuBar1 = new wxMenuBar();
     Menu1 = new wxMenu();
@@ -151,6 +164,12 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     SetStatusBar(StatusBar1);
     Center();
 
+    Connect(ID_COURSELISTBOX,wxEVT_COMMAND_CHECKLISTBOX_TOGGLED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnCourseListToggled);
+    Connect(ID_COURSELISTBOX,wxEVT_COMMAND_LISTBOX_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnCourseListSelect);
+    Connect(BTN_SELECTALLCOURSE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnSelectAllCourseClick);
+    Connect(BTN_MOVECOURSEUP,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnMoveCourseUpClick);
+    Connect(BTN_MOVECOURSEDOWN,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnMoveCourseDownClick);
+    Connect(TXT_COURSENAME,wxEVT_COMMAND_TEXT_ENTER,(wxObjectEventFunction)&Courseplay_EditorFrame::OnCourseNameEnter);
     Connect(idMenuQuit,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnQuit);
     Connect(idMenuAbout,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnAbout);
     Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&Courseplay_EditorFrame::OnClose);
@@ -178,3 +197,112 @@ void Courseplay_EditorFrame::OnClose(wxCloseEvent& event)
 {
     Destroy();
 }
+
+void Courseplay_EditorFrame::OnCourseListToggled(wxCommandEvent& event)
+{
+    courseListSelectedAll = true;
+
+    for (int i = 0; i < (int)courseList->GetCount(); i++)
+    {
+        if (!courseList->IsChecked(i))
+        {
+            courseListSelectedAll = false;
+            break;
+        }
+    }
+
+    // TODO: Update drawArea to show or hide the route.
+}
+
+void Courseplay_EditorFrame::OnCourseListSelect(wxCommandEvent& event)
+{
+    courseListSelectedIndex = event.GetInt();
+
+    moveCourseUp->Enable(courseListSelectedIndex != 0);
+    moveCourseDown->Enable(courseListSelectedIndex < (int)courseList->GetCount() - 1);
+
+    courseName->SetValue(courseList->GetString(courseListSelectedIndex));
+
+    if (!courseName->IsEnabled())
+        courseName->Enable();
+    courseName->SetFocus();
+    courseName->SetInsertionPointEnd();
+
+}
+
+void Courseplay_EditorFrame::OnSelectAllCourseClick(wxCommandEvent& event)
+{
+    for (int i = 0; i < (int)courseList->GetCount(); i++)
+    {
+        if (!courseListSelectedAll)
+            courseList->Check(i, true);
+        else
+            courseList->Check(i, false);
+    }
+
+    courseListSelectedAll = (!courseListSelectedAll);
+    //SetStatusText(wxString::Format(wxT("Index: %d"), (int)courseListSelectedAll),1);
+
+    // TODO: Update drawArea to show or hide routes
+}
+
+void Courseplay_EditorFrame::OnCourseNameEnter(wxCommandEvent& event)
+{
+    courseList->SetString(courseListSelectedIndex, courseName->GetValue());
+    courseName->SetValue(wxT(""));
+    courseName->Enable(false);
+    courseList->Deselect(courseListSelectedIndex);
+    courseListSelectedIndex = -1;
+
+    moveCourseUp->Enable(false);
+    moveCourseDown->Enable(false);
+}
+
+void Courseplay_EditorFrame::OnMoveCourseUpClick(wxCommandEvent& event)
+{
+    int oldpos = courseListSelectedIndex; // need this for the list to update.
+
+    CheckListItem item;
+    item.text = courseList->GetString(courseListSelectedIndex);
+    item.isChecked = courseList->IsChecked(courseListSelectedIndex);
+
+    courseList->Delete(courseListSelectedIndex);
+
+    courseListSelectedIndex--;
+
+    courseList->Insert(item.text, courseListSelectedIndex);
+
+    courseList->Check(courseListSelectedIndex, item.isChecked);
+    courseList->SetSelection(courseListSelectedIndex);
+
+    // TODO: Move the course up in the course list (The real course list).
+
+    moveCourseUp->Enable(courseListSelectedIndex != 0);
+    moveCourseDown->Enable(courseListSelectedIndex < (int)courseList->GetCount() - 1);
+}
+
+void Courseplay_EditorFrame::OnMoveCourseDownClick(wxCommandEvent& event)
+{
+    int oldpos = courseListSelectedIndex; // need this for the list to update.
+
+    CheckListItem item;
+    item.text = courseList->GetString(courseListSelectedIndex);
+    item.isChecked = courseList->IsChecked(courseListSelectedIndex);
+
+    courseList->Delete(courseListSelectedIndex);
+
+    courseListSelectedIndex++;
+
+    if (courseListSelectedIndex == (int)courseList->GetCount())
+        courseList->Append(item.text);
+    else
+        courseList->Insert(item.text, courseListSelectedIndex);
+
+    courseList->Check(courseListSelectedIndex, item.isChecked);
+    courseList->SetSelection(courseListSelectedIndex);
+
+    // TODO: Move the course down in the course list (The real course list).
+
+    moveCourseUp->Enable(courseListSelectedIndex != 0);
+    moveCourseDown->Enable(courseListSelectedIndex < (int)courseList->GetCount() - 1);
+ }
