@@ -2,8 +2,11 @@
 /obj
 /wxsmith
 
-/Courseplay Editor.cbp
-/Courseplay Editor.depend
-/Courseplay Editor.layout
+/*.cbp
+/*.depend
+/*.layout
+/*.vcxproj
+/*.vcxproj.filters
+/*.vcxproj.user
 
 /*.bak
