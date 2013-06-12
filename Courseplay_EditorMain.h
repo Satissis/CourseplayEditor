@@ -17,6 +17,7 @@
 #include <wx/menu.h>
 #include <wx/textctrl.h>
 #include <wx/checklst.h>
+#include <wx/checkbox.h>
 #include <wx/aui/aui.h>
 #include <wx/panel.h>
 #include <wx/button.h>
@@ -53,6 +54,9 @@ class Courseplay_EditorFrame: public wxFrame
         void OnCourseNameEnter(wxCommandEvent& event);
         void OnMoveCourseUpClick(wxCommandEvent& event);
         void OnMoveCourseDownClick(wxCommandEvent& event);
+        void OnWpPropReverseClick(wxCommandEvent& event);
+        void OnWpPropWaitPointClick(wxCommandEvent& event);
+        void OnWpPropCrossingClick(wxCommandEvent& event);
         //*)
 
         //(*Identifiers(Courseplay_EditorFrame)
@@ -66,6 +70,18 @@ class Courseplay_EditorFrame: public wxFrame
         static const long ID_STATICTEXT1;
         static const long TXT_COURSENAME;
         static const long ID_PANEL1;
+        static const long ID_STATICTEXT2;
+        static const long ID_TEXTCTRL1;
+        static const long ID_STATICTEXT3;
+        static const long ID_TEXTCTRL2;
+        static const long ID_STATICTEXT5;
+        static const long ID_TEXTCTRL3;
+        static const long ID_STATICTEXT4;
+        static const long ID_TEXTCTRL4;
+        static const long ID_CHECKBOX1;
+        static const long ID_CHECKBOX2;
+        static const long ID_CHECKBOX3;
+        static const long ID_PANEL2;
         static const long ID_File_Load;
         static const long ID_File_Save;
         static const long idMenuQuit;
@@ -78,15 +94,27 @@ class Courseplay_EditorFrame: public wxFrame
         wxCheckListBox* courseList;
         wxButton* moveCourseDown;
         wxButton* moveCourseUp;
+        wxTextCtrl* wpPropPosX;
+        wxStaticText* StaticText2;
         wxAuiToolBar* Aui_Toolbar1;
+        wxTextCtrl* wpPropAngle;
+        wxPanel* panelCourseList;
         wxMenuItem* MenuItem4;
         wxTextCtrl* courseName;
+        wxCheckBox* wpPropWaitPoint;
         wxButton* selectAllCourse;
-        wxPanel* Panel1;
+        wxPanel* panelWpProp;
         wxStaticText* StaticText1;
+        wxStaticText* StaticText3;
         wxScrolledWindow* mainWindow;
         wxMenuItem* MenuItem3;
+        wxStaticText* StaticText5;
         wxStatusBar* StatusBar1;
+        wxTextCtrl* wpPropSpeed;
+        wxTextCtrl* wpPropPosY;
+        wxStaticText* StaticText4;
+        wxCheckBox* wpPropCrossing;
+        wxCheckBox* wpPropReverse;
         //*)
 
         DECLARE_EVENT_TABLE()
