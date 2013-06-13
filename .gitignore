@@ -10,3 +10,5 @@
 /*.vcxproj.user
 
 /*.bak
+
+/resource.h

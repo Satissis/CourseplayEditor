@@ -10,6 +10,8 @@
 #ifndef COURSEPLAY_EDITORMAIN_H
 #define COURSEPLAY_EDITORMAIN_H
 
+#include "wxPNGResource.h"
+
 //(*Headers(Courseplay_EditorFrame)
 #include <wx/scrolwin.h>
 #include <wx/sizer.h>
@@ -38,9 +40,23 @@ class Courseplay_EditorFrame: public wxFrame
         Courseplay_EditorFrame(wxWindow* parent,wxWindowID id = -1);
         virtual ~Courseplay_EditorFrame();
 
+
+    public:
+        void OnBtnFillOutDropdown   (wxAuiToolBarEvent& event);
+        void OnBtnGameSelectDropdown(wxAuiToolBarEvent& event);
+        void OnGameFS2011Select     (wxCommandEvent& event);
+        void OnGameFS2013Select     (wxCommandEvent& event);
+
     private:
-        bool courseListSelectedAll;
-        int  courseListSelectedIndex;
+        bool            courseListSelectedAll;
+        int             courseListSelectedIndex;
+        wxPNGResource   res;
+
+        wxBitmap TbIcon_FS2011;
+        wxBitmap TbIcon_FS2013;
+
+        static const long Game_FarmingSimulator2011;
+        static const long Game_FarmingSimulator2013;
 
     private:
 
@@ -61,6 +77,10 @@ class Courseplay_EditorFrame: public wxFrame
 
         //(*Identifiers(Courseplay_EditorFrame)
         static const long ID_TLB1_BTN_NEW;
+        static const long ID_TLB1_BTN_INSERT;
+        static const long ID_TLB1_BTN_DELETE;
+        static const long ID_TLB1_BTN_FILL;
+        static const long ID_TLB1_BTN_GAME_SELECT;
         static const long TLB_1;
         static const long ID_Main_Window;
         static const long ID_COURSELISTBOX;
@@ -96,7 +116,6 @@ class Courseplay_EditorFrame: public wxFrame
         wxButton* moveCourseUp;
         wxTextCtrl* wpPropPosX;
         wxStaticText* StaticText2;
-        wxAuiToolBar* Aui_Toolbar1;
         wxTextCtrl* wpPropAngle;
         wxPanel* panelCourseList;
         wxMenuItem* MenuItem4;
@@ -111,6 +130,7 @@ class Courseplay_EditorFrame: public wxFrame
         wxStaticText* StaticText5;
         wxStatusBar* StatusBar1;
         wxTextCtrl* wpPropSpeed;
+        wxAuiToolBar* AuiTools1;
         wxTextCtrl* wpPropPosY;
         wxStaticText* StaticText4;
         wxCheckBox* wpPropCrossing;

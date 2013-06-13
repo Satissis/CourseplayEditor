@@ -12,13 +12,10 @@
 
 //(*InternalHeaders(Courseplay_EditorFrame)
 #include <wx/bitmap.h>
-#include <wx/icon.h>
 #include <wx/intl.h>
 #include <wx/image.h>
 #include <wx/string.h>
 //*)
-
-#include "wxPNGResource.h"
 
 //helper functions
 enum wxbuildinfoformat {
@@ -48,6 +45,10 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 
 //(*IdInit(Courseplay_EditorFrame)
 const long Courseplay_EditorFrame::ID_TLB1_BTN_NEW = wxNewId();
+const long Courseplay_EditorFrame::ID_TLB1_BTN_INSERT = wxNewId();
+const long Courseplay_EditorFrame::ID_TLB1_BTN_DELETE = wxNewId();
+const long Courseplay_EditorFrame::ID_TLB1_BTN_FILL = wxNewId();
+const long Courseplay_EditorFrame::ID_TLB1_BTN_GAME_SELECT = wxNewId();
 const long Courseplay_EditorFrame::TLB_1 = wxNewId();
 const long Courseplay_EditorFrame::ID_Main_Window = wxNewId();
 const long Courseplay_EditorFrame::ID_COURSELISTBOX = wxNewId();
@@ -76,16 +77,30 @@ const long Courseplay_EditorFrame::idMenuAbout = wxNewId();
 const long Courseplay_EditorFrame::ID_STATUSBAR1 = wxNewId();
 //*)
 
+const long Courseplay_EditorFrame::Game_FarmingSimulator2011 = wxNewId();
+const long Courseplay_EditorFrame::Game_FarmingSimulator2013 = wxNewId();
+
+#define TB_ICON_SIZE 16
+
 BEGIN_EVENT_TABLE(Courseplay_EditorFrame,wxFrame)
     //(*EventTable(Courseplay_EditorFrame)
     //*)
+    EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_TLB1_BTN_FILL,          Courseplay_EditorFrame::OnBtnFillOutDropdown)
+    EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_TLB1_BTN_GAME_SELECT,   Courseplay_EditorFrame::OnBtnGameSelectDropdown)
+
+    EVT_MENU                    (Game_FarmingSimulator2011, Courseplay_EditorFrame::OnGameFS2011Select)
+    EVT_MENU                    (Game_FarmingSimulator2013, Courseplay_EditorFrame::OnGameFS2013Select)
 END_EVENT_TABLE()
 
 Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
 {
     // Create images to use.
-    wxPNGResource res;
-    wxBitmap appIcon = res.GetBitmap(wxT("AppIcon"), 16, 16);
+    wxBitmap TbIcon_Add     = res.GetBitmap(wxT("btn_Add"),     TB_ICON_SIZE, TB_ICON_SIZE);
+    wxBitmap TbIcon_Insert  = res.GetBitmap(wxT("btn_Insert"),  TB_ICON_SIZE, TB_ICON_SIZE);
+    wxBitmap TbIcon_Delete  = res.GetBitmap(wxT("btn_Delete"),  TB_ICON_SIZE, TB_ICON_SIZE);
+    wxBitmap TbIcon_FillOut = res.GetBitmap(wxT("btn_FillOut"), TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_FS2011           = res.GetBitmap(wxT("FS2011"),      TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_FS2013           = res.GetBitmap(wxT("FS2013"),      TB_ICON_SIZE, TB_ICON_SIZE);
 
     // set default variables
     courseListSelectedAll   = false;
@@ -117,16 +132,21 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
 
     Create(parent, wxID_ANY, _("Courseplay Editor"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
     SetClientSize(wxSize(1066,582));
-    {
-    	wxIcon FrameIcon;
-    	FrameIcon.CopyFromBitmap(appIcon);
-    	SetIcon(FrameIcon);
-    }
-    AuiManager1 = new wxAuiManager(this, wxAUI_MGR_DEFAULT);
-    Aui_Toolbar1 = new wxAuiToolBar(this, TLB_1, wxPoint(55,48), wxSize(236,24), wxAUI_TB_DEFAULT_STYLE);
-    Aui_Toolbar1->AddTool(ID_TLB1_BTN_NEW, _("Add"), wxNullBitmap, wxNullBitmap, wxITEM_NORMAL, _("Add new waypoint"), _("Add new waypoint to the end of the route"), NULL);
-    Aui_Toolbar1->Realize();
-    AuiManager1->AddPane(Aui_Toolbar1, wxAuiPaneInfo().Name(_T("TLB_1")).ToolbarPane().Caption(_("Pane caption")).CloseButton(false).Layer(10).Top().BestSize(wxSize(236,24)).Gripper());
+    SetToolTip(_("Move course up in the list."));
+    SetIcon(wxICON(appIcon));
+    AuiManager1 = new wxAuiManager(this, wxAUI_MGR_TRANSPARENT_HINT|wxAUI_MGR_DEFAULT);
+    AuiTools1 = new wxAuiToolBar(this, TLB_1, wxPoint(55,48), wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
+    AuiTools1->AddTool(ID_TLB1_BTN_NEW, _("Add"), TbIcon_Add, wxNullBitmap, wxITEM_NORMAL, _("Add new waypoint"), _("Add new waypoint to the end of the route"), NULL);
+    AuiTools1->AddTool(ID_TLB1_BTN_INSERT, _("Insert"), TbIcon_Insert, wxNullBitmap, wxITEM_NORMAL, _("Insert a waypoint"), _("Insert a waypoint before the selected waypoint."), NULL);
+    AuiTools1->AddTool(ID_TLB1_BTN_DELETE, _("Delete Waypoint"), TbIcon_Delete, wxNullBitmap, wxITEM_NORMAL, _("Delete selected waypoint."), wxEmptyString, NULL);
+    AuiTools1->AddTool(ID_TLB1_BTN_FILL, _("Fill Out"), TbIcon_FillOut, wxNullBitmap, wxITEM_NORMAL, _("Fill Out"), _("Insert waypoints between the selected waypoint to the previus waypoint."), NULL);
+    AuiTools1->SetToolDropDown(ID_TLB1_BTN_FILL, true);
+    AuiTools1->AddSeparator();
+    AuiTools1->AddTool(ID_TLB1_BTN_GAME_SELECT, _("Game Select"), TbIcon_FS2013, wxNullBitmap, wxITEM_NORMAL, _("Game Select"), wxEmptyString, NULL);
+    AuiTools1->SetToolDropDown(ID_TLB1_BTN_GAME_SELECT, true);
+    AuiTools1->AddSeparator();
+    AuiTools1->Realize();
+    AuiManager1->AddPane(AuiTools1, wxAuiPaneInfo().Name(_T("TLB_1")).ToolbarPane().Caption(_("Pane caption")).CloseButton(false).Layer(10).Top().LeftDockable(false).RightDockable(false).Gripper());
     mainWindow = new wxScrolledWindow(this, ID_Main_Window, wxPoint(367,283), wxDefaultSize, wxSTATIC_BORDER|wxVSCROLL|wxHSCROLL|wxALWAYS_SHOW_SB|wxFULL_REPAINT_ON_RESIZE, _T("ID_Main_Window"));
     AuiManager1->AddPane(mainWindow, wxAuiPaneInfo().Name(_T("mainWindow")).CenterPane().Caption(_("Pane caption")));
     panelCourseList = new wxPanel(this, ID_PANEL1, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER, _T("ID_PANEL1"));
@@ -145,10 +165,14 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     BoxSizer1->Add(courseList, 1, wxTOP|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_TOP|wxALIGN_CENTER_HORIZONTAL, 5);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
     selectAllCourse = new wxButton(panelCourseList, BTN_SELECTALLCOURSE, _("(Un)Select All"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("BTN_SELECTALLCOURSE"));
+    selectAllCourse->SetToolTip(_("Select or unselect all courses to show the courses on the map or not."));
+    selectAllCourse->SetHelpText(_("Select or unselect all courses to show the courses on the map or not."));
     BoxSizer2->Add(selectAllCourse, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer2->Add(15,20,1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     moveCourseUp = new wxButton(panelCourseList, BTN_MOVECOURSEUP, _("Up"), wxDefaultPosition, wxSize(23,23), 0, wxDefaultValidator, _T("BTN_MOVECOURSEUP"));
     moveCourseUp->Disable();
+    moveCourseUp->SetToolTip(_("Move course up in the list."));
+    moveCourseUp->SetHelpText(_("Move course up in the list."));
     BoxSizer2->Add(moveCourseUp, 0, wxRIGHT|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
     moveCourseDown = new wxButton(panelCourseList, BTN_MOVECOURSEDOWN, _("Dn"), wxDefaultPosition, wxSize(23,23), 0, wxDefaultValidator, _T("BTN_MOVECOURSEDOWN"));
     moveCourseDown->Disable();
@@ -160,6 +184,7 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     courseName = new wxTextCtrl(panelCourseList, TXT_COURSENAME, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, courseNameValidator, _T("TXT_COURSENAME"));
     courseName->SetMaxLength(20);
     courseName->Disable();
+    courseName->SetToolTip(_("Rename a course by changin it here after selecting it on the list."));
     BoxSizer3->Add(courseName, 1, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer1->Add(BoxSizer3, 0, wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     panelCourseList->SetSizer(BoxSizer1);
@@ -194,12 +219,15 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     GridSizer1 = new wxGridSizer(0, 2, 0, 0);
     wpPropReverse = new wxCheckBox(panelWpProp, ID_CHECKBOX1, _("Reverse"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
     wpPropReverse->SetValue(false);
+    wpPropReverse->SetToolTip(_("A reverse waypoint, meaning the the vehiche should reverse at this waypoint."));
     GridSizer1->Add(wpPropReverse, 1, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     wpPropWaitPoint = new wxCheckBox(panelWpProp, ID_CHECKBOX2, _("Waiting Point"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX2"));
     wpPropWaitPoint->SetValue(false);
+    wpPropWaitPoint->SetToolTip(_("Set the waypoint as an waiting point.\nThis can be used to set a field start or end point and more."));
     GridSizer1->Add(wpPropWaitPoint, 1, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     wpPropCrossing = new wxCheckBox(panelWpProp, ID_CHECKBOX3, _("Crossing"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX3"));
     wpPropCrossing->SetValue(false);
+    wpPropCrossing->SetToolTip(_("Crossing is used when combining 2 or more courses.\na course needs to have this set at the starting waypoint and ending waypoint."));
     GridSizer1->Add(wpPropCrossing, 1, wxTOP|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer4->Add(GridSizer1, 0, wxBOTTOM|wxLEFT|wxRIGHT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     panelWpProp->SetSizer(BoxSizer4);
@@ -243,6 +271,8 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     Connect(idMenuAbout,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnAbout);
     Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&Courseplay_EditorFrame::OnClose);
     //*)
+
+
 }
 
 Courseplay_EditorFrame::~Courseplay_EditorFrame()
@@ -312,12 +342,12 @@ void Courseplay_EditorFrame::OnSelectAllCourseClick(wxCommandEvent& event)
     courseListSelectedAll = (!courseListSelectedAll);
     //SetStatusText(wxString::Format(wxT("Index: %d"), (int)courseListSelectedAll),1);
 
-    // TODO: Update drawArea to show or hide routes
+    // TODO: Update drawArea to show or hide all routes
 }
 
 void Courseplay_EditorFrame::OnCourseNameEnter(wxCommandEvent& event)
 {
-    courseList->SetString(courseListSelectedIndex, courseName->GetValue());
+    courseList->SetString(courseListSelectedIndex, courseName->GetValue()); // NOTE: Maybe add .MakeLower() to GetValue
     courseName->SetValue(wxT(""));
     courseName->Enable(false);
     courseList->Deselect(courseListSelectedIndex);
@@ -386,5 +416,97 @@ void Courseplay_EditorFrame::OnWpPropWaitPointClick(wxCommandEvent& event)
 
 void Courseplay_EditorFrame::OnWpPropCrossingClick(wxCommandEvent& event)
 {
-    //wxTextValidator(wxFILTER_ALPHANUMERIC | wxFILTER_INCLUDE_LIST)::SetIncludes(wxArrayString {wxT(" ")}))
+}
+
+void Courseplay_EditorFrame::OnBtnFillOutDropdown(wxAuiToolBarEvent& event)
+{
+    if (event.IsDropDownClicked())
+    {
+        //SetStatusText(wxT("Drop Down Clicked!"));
+        wxAuiToolBar* tb = static_cast<wxAuiToolBar*>(event.GetEventObject());
+
+        tb->SetToolSticky(event.GetId(), true);
+
+        // create the popup menu
+        wxMenu menuPopup;
+
+        wxBitmap icon = res.GetBitmap(wxT("icon_Width"), 16, 16);
+        //wxBitmap bmp = wxArtProvider::GetBitmap(wxART_QUESTION, wxART_OTHER, wxSize(16,16));
+
+        wxMenuItem* m1 =  new wxMenuItem(&menuPopup, 101, _("5 meters"));
+        m1->SetBitmap(icon);
+        menuPopup.Append(m1);
+
+        wxMenuItem* m2 =  new wxMenuItem(&menuPopup, 101, _("10 meters"));
+        m2->SetBitmap(icon);
+        menuPopup.Append(m2);
+
+        wxMenuItem* m3 =  new wxMenuItem(&menuPopup, 101, _("20 meters"));
+        m3->SetBitmap(icon);
+        menuPopup.Append(m3);
+
+        // line up our menu with the button
+        wxRect rect = tb->GetToolRect(event.GetId());
+        wxPoint pt = tb->ClientToScreen(rect.GetBottomLeft());
+        pt = ScreenToClient(pt);
+
+
+        PopupMenu(&menuPopup, pt);
+
+
+        // make sure the button is "un-stuck"
+        tb->SetToolSticky(event.GetId(), false);
+    }
+    else
+    {
+        //SetStatusText(wxT("Fill Out Clicked!"));
+    }
+}
+
+void Courseplay_EditorFrame::OnBtnGameSelectDropdown(wxAuiToolBarEvent& event)
+{
+    if (event.IsDropDownClicked())
+    {
+        //SetStatusText(wxT("Drop Down Clicked!"));
+        wxAuiToolBar* tb = static_cast<wxAuiToolBar*>(event.GetEventObject());
+
+        tb->SetToolSticky(event.GetId(), true);
+
+        // create the popup menu
+        wxMenu menuPopup;
+
+        wxMenuItem* m1 =  new wxMenuItem(&menuPopup, Game_FarmingSimulator2011, _("Farming Simulator 2011"));
+        m1->SetBitmap(TbIcon_FS2011);
+        menuPopup.Append(m1);
+
+        wxMenuItem* m2 =  new wxMenuItem(&menuPopup, Game_FarmingSimulator2013, _("Farming Simulator 2011"));
+        m2->SetBitmap(TbIcon_FS2013);
+        menuPopup.Append(m2);
+
+        // line up our menu with the button
+        wxRect rect = tb->GetToolRect(event.GetId());
+        wxPoint pt = tb->ClientToScreen(rect.GetBottomLeft());
+        pt = ScreenToClient(pt);
+
+
+        PopupMenu(&menuPopup, pt);
+
+
+        // make sure the button is "un-stuck"
+        tb->SetToolSticky(event.GetId(), false);
+    }
+}
+
+void Courseplay_EditorFrame::OnGameFS2011Select(wxCommandEvent& event)
+{
+    AuiTools1->SetToolBitmap(ID_TLB1_BTN_GAME_SELECT, TbIcon_FS2011);
+
+    // TODO: Reset everything for game change to Farming Simulator 2011
+}
+
+void Courseplay_EditorFrame::OnGameFS2013Select(wxCommandEvent& event)
+{
+    AuiTools1->SetToolBitmap(ID_TLB1_BTN_GAME_SELECT, TbIcon_FS2013);
+
+    // TODO: Reset everything for game change to Farming Simulator 2013
 }
