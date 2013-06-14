@@ -49,6 +49,8 @@ const long Courseplay_EditorFrame::ID_TLB1_BTN_INSERT = wxNewId();
 const long Courseplay_EditorFrame::ID_TLB1_BTN_DELETE = wxNewId();
 const long Courseplay_EditorFrame::ID_TLB1_BTN_FILL = wxNewId();
 const long Courseplay_EditorFrame::ID_TLB1_BTN_GAME_SELECT = wxNewId();
+const long Courseplay_EditorFrame::ID_TOOL_UNDO = wxNewId();
+const long Courseplay_EditorFrame::ID_TOOL_REDO = wxNewId();
 const long Courseplay_EditorFrame::TLB_1 = wxNewId();
 const long Courseplay_EditorFrame::ID_Main_Window = wxNewId();
 const long Courseplay_EditorFrame::ID_COURSELISTBOX = wxNewId();
@@ -73,14 +75,23 @@ const long Courseplay_EditorFrame::ID_PANEL2 = wxNewId();
 const long Courseplay_EditorFrame::ID_File_Load = wxNewId();
 const long Courseplay_EditorFrame::ID_File_Save = wxNewId();
 const long Courseplay_EditorFrame::idMenuQuit = wxNewId();
+const long Courseplay_EditorFrame::ID_EDIT_Undo = wxNewId();
+const long Courseplay_EditorFrame::ID_EDIT_Redo = wxNewId();
+const long Courseplay_EditorFrame::ID_EDIT_Settings = wxNewId();
+const long Courseplay_EditorFrame::ID_HELP_Manual = wxNewId();
 const long Courseplay_EditorFrame::idMenuAbout = wxNewId();
 const long Courseplay_EditorFrame::ID_STATUSBAR1 = wxNewId();
 //*)
 
-const long Courseplay_EditorFrame::Game_FarmingSimulator2011 = wxNewId();
-const long Courseplay_EditorFrame::Game_FarmingSimulator2013 = wxNewId();
+const long Courseplay_EditorFrame::Game_FarmingSimulator2011    = wxNewId();
+const long Courseplay_EditorFrame::Game_FarmingSimulator2013    = wxNewId();
+const long Courseplay_EditorFrame::RightClickMenu_Add           = wxNewId();
+const long Courseplay_EditorFrame::RightClickMenu_Insert        = wxNewId();
+const long Courseplay_EditorFrame::RightClickMenu_Delete        = wxNewId();
+const long Courseplay_EditorFrame::RightClickMenu_FillOut       = wxNewId();
 
-#define TB_ICON_SIZE 16
+#define MENU_ICON_SIZE  16
+#define TB_ICON_SIZE    16
 
 BEGIN_EVENT_TABLE(Courseplay_EditorFrame,wxFrame)
     //(*EventTable(Courseplay_EditorFrame)
@@ -90,29 +101,47 @@ BEGIN_EVENT_TABLE(Courseplay_EditorFrame,wxFrame)
 
     EVT_MENU                    (Game_FarmingSimulator2011, Courseplay_EditorFrame::OnGameFS2011Select)
     EVT_MENU                    (Game_FarmingSimulator2013, Courseplay_EditorFrame::OnGameFS2013Select)
+
+    EVT_MENU                    (RightClickMenu_Add,        Courseplay_EditorFrame::OnRCMAddSelect)
+    EVT_MENU                    (RightClickMenu_Insert,     Courseplay_EditorFrame::OnRCMInsertSelect)
+    EVT_MENU                    (RightClickMenu_Delete,     Courseplay_EditorFrame::OnRCMDeleteSelect)
+    EVT_MENU                    (RightClickMenu_FillOut,    Courseplay_EditorFrame::OnRCMFillSelect)
 END_EVENT_TABLE()
 
 Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
 {
     // Create images to use.
-    wxBitmap TbIcon_Add     = res.GetBitmap(wxT("btn_Add"),     TB_ICON_SIZE, TB_ICON_SIZE);
-    wxBitmap TbIcon_Insert  = res.GetBitmap(wxT("btn_Insert"),  TB_ICON_SIZE, TB_ICON_SIZE);
-    wxBitmap TbIcon_Delete  = res.GetBitmap(wxT("btn_Delete"),  TB_ICON_SIZE, TB_ICON_SIZE);
-    wxBitmap TbIcon_FillOut = res.GetBitmap(wxT("btn_FillOut"), TB_ICON_SIZE, TB_ICON_SIZE);
-    TbIcon_FS2011           = res.GetBitmap(wxT("FS2011"),      TB_ICON_SIZE, TB_ICON_SIZE);
-    TbIcon_FS2013           = res.GetBitmap(wxT("FS2013"),      TB_ICON_SIZE, TB_ICON_SIZE);
+    wxBitmap MenuIcon_Exit      = res.GetBitmap(wxT("btn_Exit"),        MENU_ICON_SIZE, MENU_ICON_SIZE);
+    wxBitmap MenuIcon_Undo      = res.GetBitmap(wxT("btn_Undo"),        MENU_ICON_SIZE, MENU_ICON_SIZE);
+    wxBitmap MenuIcon_Redo      = res.GetBitmap(wxT("btn_Redo"),        MENU_ICON_SIZE, MENU_ICON_SIZE);
+    wxBitmap MenuIcon_Settings  = res.GetBitmap(wxT("btn_Settings"),    MENU_ICON_SIZE, MENU_ICON_SIZE);
+    wxBitmap MenuIcon_Help      = res.GetBitmap(wxT("btn_Help"),        MENU_ICON_SIZE, MENU_ICON_SIZE);
+
+    TbIcon_Add      = res.GetBitmap(wxT("btn_Add"),     TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_Insert   = res.GetBitmap(wxT("btn_Insert"),  TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_Delete   = res.GetBitmap(wxT("btn_Delete"),  TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_FillOut  = res.GetBitmap(wxT("btn_FillOut"), TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_FS2011   = res.GetBitmap(wxT("FS2011"),      TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_FS2013   = res.GetBitmap(wxT("FS2013"),      TB_ICON_SIZE, TB_ICON_SIZE);
 
     // set default variables
     courseListSelectedAll   = false;
+    rightClickMenuOpen      = false;
     courseListSelectedIndex = -1;
+    mousePosX               = 0;
+    mousePosY               = 0;
 
     // Create a input text validator
     wxArrayString validatorIncludeList;
     validatorIncludeList.Alloc(127-32);
-    for (int i = 32; i < 127; i++)
-    {
-        validatorIncludeList.Add(wxString::Format(wxT("%c"), i));
-    }
+    // characters avalible in validator: 32, 40, 41, 43, 45-57, 65-90, 97-122
+    validatorIncludeList.Add(wxString::Format(wxT("%c"), 32)); // " " space
+    validatorIncludeList.Add(wxString::Format(wxT("%c"), 40)); // "("
+    validatorIncludeList.Add(wxString::Format(wxT("%c"), 41)); // ")"
+    validatorIncludeList.Add(wxString::Format(wxT("%c"), 43)); // "+"
+    for (int i = 45; i <= 57; i++)  validatorIncludeList.Add(wxString::Format(wxT("%c"), i)); // "- . / 0-9"
+    for (int i = 65; i <= 90; i++)  validatorIncludeList.Add(wxString::Format(wxT("%c"), i)); // "A-Z"
+    for (int i = 97; i <= 122; i++) validatorIncludeList.Add(wxString::Format(wxT("%c"), i)); // "a-z"
     wxTextValidator courseNameValidator(wxFILTER_INCLUDE_CHAR_LIST);
     courseNameValidator.SetIncludes(validatorIncludeList);
     courseNameValidator.SetBellOnError();
@@ -132,7 +161,6 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
 
     Create(parent, wxID_ANY, _("Courseplay Editor"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
     SetClientSize(wxSize(1066,582));
-    SetToolTip(_("Move course up in the list."));
     SetIcon(wxICON(appIcon));
     AuiManager1 = new wxAuiManager(this, wxAUI_MGR_TRANSPARENT_HINT|wxAUI_MGR_DEFAULT);
     AuiTools1 = new wxAuiToolBar(this, TLB_1, wxPoint(55,48), wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
@@ -145,6 +173,8 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     AuiTools1->AddTool(ID_TLB1_BTN_GAME_SELECT, _("Game Select"), TbIcon_FS2013, wxNullBitmap, wxITEM_NORMAL, _("Game Select"), wxEmptyString, NULL);
     AuiTools1->SetToolDropDown(ID_TLB1_BTN_GAME_SELECT, true);
     AuiTools1->AddSeparator();
+    AuiTools1->AddTool(ID_TOOL_UNDO, _("Undo"), MenuIcon_Undo, wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL);
+    AuiTools1->AddTool(ID_TOOL_REDO, _("Redo"), MenuIcon_Redo, wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL);
     AuiTools1->Realize();
     AuiManager1->AddPane(AuiTools1, wxAuiPaneInfo().Name(_T("TLB_1")).ToolbarPane().Caption(_("Pane caption")).CloseButton(false).Layer(10).Top().LeftDockable(false).RightDockable(false).Gripper());
     mainWindow = new wxScrolledWindow(this, ID_Main_Window, wxPoint(367,283), wxDefaultSize, wxSTATIC_BORDER|wxVSCROLL|wxHSCROLL|wxALWAYS_SHOW_SB|wxFULL_REPAINT_ON_RESIZE, _T("ID_Main_Window"));
@@ -237,15 +267,33 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     AuiManager1->Update();
     MenuBar1 = new wxMenuBar();
     Menu1 = new wxMenu();
-    MenuItem3 = new wxMenuItem(Menu1, ID_File_Load, _("&Load Route"), _("Load route from a savegame"), wxITEM_NORMAL);
-    Menu1->Append(MenuItem3);
-    MenuItem4 = new wxMenuItem(Menu1, ID_File_Save, _("&Save Routes"), _("Save the loaded routes"), wxITEM_NORMAL);
-    Menu1->Append(MenuItem4);
-    MenuItem4->Enable(false);
+    LoadCourses = new wxMenuItem(Menu1, ID_File_Load, _("&Load Courses"), _("Load route from a savegame"), wxITEM_NORMAL);
+    Menu1->Append(LoadCourses);
+    SaveCourses = new wxMenuItem(Menu1, ID_File_Save, _("&Save Courses"), _("Save the loaded routes"), wxITEM_NORMAL);
+    Menu1->Append(SaveCourses);
+    SaveCourses->Enable(false);
+    Menu1->AppendSeparator();
     MenuItem1 = new wxMenuItem(Menu1, idMenuQuit, _("E&xit\tAlt-F4"), _("Close Courseplay Editor"), wxITEM_NORMAL);
+    MenuItem1->SetBitmap(MenuIcon_Exit);
     Menu1->Append(MenuItem1);
     MenuBar1->Append(Menu1, _("&File"));
+    Menu3 = new wxMenu();
+    Undo = new wxMenuItem(Menu3, ID_EDIT_Undo, _("Undo\tCtrl-z"), _("Undo last action"), wxITEM_NORMAL);
+    Undo->SetBitmap(MenuIcon_Undo);
+    Menu3->Append(Undo);
+    Redo = new wxMenuItem(Menu3, ID_EDIT_Redo, _("Redo\tCtrl-Shift-z"), _("Redo last action"), wxITEM_NORMAL);
+    Redo->SetBitmap(MenuIcon_Redo);
+    Menu3->Append(Redo);
+    Menu3->AppendSeparator();
+    Settings = new wxMenuItem(Menu3, ID_EDIT_Settings, _("Settings"), _("Settings"), wxITEM_NORMAL);
+    Settings->SetBitmap(MenuIcon_Settings);
+    Menu3->Append(Settings);
+    MenuBar1->Append(Menu3, _("&Edit"));
     Menu2 = new wxMenu();
+    Manual = new wxMenuItem(Menu2, ID_HELP_Manual, _("Manual (Not implemented)"), _("Manual on how Courseplay Editor works"), wxITEM_NORMAL);
+    Manual->SetBitmap(MenuIcon_Help);
+    Menu2->Append(Manual);
+    Menu2->AppendSeparator();
     MenuItem2 = new wxMenuItem(Menu2, idMenuAbout, _("About\tF1"), _("Show info about this application"), wxITEM_NORMAL);
     Menu2->Append(MenuItem2);
     MenuBar1->Append(Menu2, _("Help"));
@@ -258,6 +306,9 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     SetStatusBar(StatusBar1);
     Center();
 
+    Connect(ID_TOOL_UNDO,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnUndoSelected);
+    Connect(ID_TOOL_REDO,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnRedoSelected);
+    mainWindow->Connect(wxEVT_RIGHT_DOWN,(wxObjectEventFunction)&Courseplay_EditorFrame::OnMainWindowRightDown,0,this);
     Connect(ID_COURSELISTBOX,wxEVT_COMMAND_CHECKLISTBOX_TOGGLED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnCourseListToggled);
     Connect(ID_COURSELISTBOX,wxEVT_COMMAND_LISTBOX_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnCourseListSelect);
     Connect(BTN_SELECTALLCOURSE,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnSelectAllCourseClick);
@@ -267,7 +318,13 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     Connect(ID_CHECKBOX1,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnWpPropReverseClick);
     Connect(ID_CHECKBOX2,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnWpPropWaitPointClick);
     Connect(ID_CHECKBOX3,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnWpPropCrossingClick);
+    Connect(ID_File_Load,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnLoadCoursesSelected);
+    Connect(ID_File_Save,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnSaveCoursesSelected);
     Connect(idMenuQuit,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnQuit);
+    Connect(ID_EDIT_Undo,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnUndoSelected);
+    Connect(ID_EDIT_Redo,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnRedoSelected);
+    Connect(ID_EDIT_Settings,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnSettingsSelected);
+    Connect(ID_HELP_Manual,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnManualSelected);
     Connect(idMenuAbout,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnAbout);
     Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&Courseplay_EditorFrame::OnClose);
     //*)
@@ -290,6 +347,8 @@ void Courseplay_EditorFrame::OnAbout(wxCommandEvent& event)
 {
     wxString msg = wxbuildinfo(long_f);
     wxMessageBox(msg, _("Welcome to..."));
+
+    // TODO: Make new about page.
 }
 
 void Courseplay_EditorFrame::OnClose(wxCloseEvent& event)
@@ -347,7 +406,7 @@ void Courseplay_EditorFrame::OnSelectAllCourseClick(wxCommandEvent& event)
 
 void Courseplay_EditorFrame::OnCourseNameEnter(wxCommandEvent& event)
 {
-    courseList->SetString(courseListSelectedIndex, courseName->GetValue()); // NOTE: Maybe add .MakeLower() to GetValue
+    courseList->SetString(courseListSelectedIndex, courseName->GetValue());
     courseName->SetValue(wxT(""));
     courseName->Enable(false);
     courseList->Deselect(courseListSelectedIndex);
@@ -408,14 +467,17 @@ void Courseplay_EditorFrame::OnMoveCourseDownClick(wxCommandEvent& event)
 
 void Courseplay_EditorFrame::OnWpPropReverseClick(wxCommandEvent& event)
 {
+    // TODO: Implement Reverse check
 }
 
 void Courseplay_EditorFrame::OnWpPropWaitPointClick(wxCommandEvent& event)
 {
+    // TODO: Implement Waiting point check
 }
 
 void Courseplay_EditorFrame::OnWpPropCrossingClick(wxCommandEvent& event)
 {
+    // TODO: Implement Crossing check
 }
 
 void Courseplay_EditorFrame::OnBtnFillOutDropdown(wxAuiToolBarEvent& event)
@@ -479,7 +541,7 @@ void Courseplay_EditorFrame::OnBtnGameSelectDropdown(wxAuiToolBarEvent& event)
         m1->SetBitmap(TbIcon_FS2011);
         menuPopup.Append(m1);
 
-        wxMenuItem* m2 =  new wxMenuItem(&menuPopup, Game_FarmingSimulator2013, _("Farming Simulator 2011"));
+        wxMenuItem* m2 =  new wxMenuItem(&menuPopup, Game_FarmingSimulator2013, _("Farming Simulator 2013"));
         m2->SetBitmap(TbIcon_FS2013);
         menuPopup.Append(m2);
 
@@ -509,4 +571,85 @@ void Courseplay_EditorFrame::OnGameFS2013Select(wxCommandEvent& event)
     AuiTools1->SetToolBitmap(ID_TLB1_BTN_GAME_SELECT, TbIcon_FS2013);
 
     // TODO: Reset everything for game change to Farming Simulator 2013
+}
+
+void Courseplay_EditorFrame::OnMainWindowRightDown(wxMouseEvent& event)
+{
+    mousePosX = event.GetX();
+    mousePosY = event.GetY();
+    // create the popup menu
+    wxMenu menuPopup;
+
+    wxMenuItem* m1 =  new wxMenuItem(&menuPopup, RightClickMenu_Add, _("Add Waypoint"));
+    m1->SetBitmap(TbIcon_Add);
+    menuPopup.Append(m1);
+
+    wxMenuItem* m2 =  new wxMenuItem(&menuPopup, RightClickMenu_Insert, _("Insert Waypoint"));
+    m2->SetBitmap(TbIcon_Insert);
+    menuPopup.Append(m2);
+
+    wxMenuItem* m3 =  new wxMenuItem(&menuPopup, RightClickMenu_Delete, _("Delete Waypoint"));
+    m3->SetBitmap(TbIcon_Delete);
+    menuPopup.Append(m3);
+
+    wxMenuItem* m4 =  new wxMenuItem(&menuPopup, RightClickMenu_FillOut, _("Fill Out"));
+    m4->SetBitmap(TbIcon_FillOut);
+    menuPopup.Append(m4);
+
+    wxPoint pt(mousePosX - 50, mousePosY + 10);
+
+
+    PopupMenu(&menuPopup, pt);
+}
+
+void Courseplay_EditorFrame::OnRCMAddSelect(wxCommandEvent& event)
+{
+    // TODO: Implement right click menu Add Select
+}
+
+void Courseplay_EditorFrame::OnRCMInsertSelect(wxCommandEvent& event)
+{
+    // TODO: Implement right click menu Insert Select
+}
+
+void Courseplay_EditorFrame::OnRCMDeleteSelect(wxCommandEvent& event)
+{
+    // TODO: Implement right click menu Delete Select
+}
+
+void Courseplay_EditorFrame::OnRCMFillSelect(wxCommandEvent& event)
+{
+    // TODO: Implement right click menu Fill Out Select
+}
+
+void Courseplay_EditorFrame::OnLoadCoursesSelected(wxCommandEvent& event)
+{
+    // TODO: Load courseplay.xml
+}
+
+void Courseplay_EditorFrame::OnSaveCoursesSelected(wxCommandEvent& event)
+{
+    // TODO: Save to courseplay.xml
+}
+
+void Courseplay_EditorFrame::OnUndoSelected(wxCommandEvent& event)
+{
+    // TODO: Implement undo
+    SetStatusText(wxT("Undo"));
+}
+
+void Courseplay_EditorFrame::OnRedoSelected(wxCommandEvent& event)
+{
+    // TODO: Implement redo
+    SetStatusText(wxT("Redo"));
+}
+
+void Courseplay_EditorFrame::OnSettingsSelected(wxCommandEvent& event)
+{
+    // TODO: Add setting
+}
+
+void Courseplay_EditorFrame::OnManualSelected(wxCommandEvent& event)
+{
+    // TODO: Add manual
 }

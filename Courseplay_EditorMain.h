@@ -46,17 +46,34 @@ class Courseplay_EditorFrame: public wxFrame
         void OnBtnGameSelectDropdown(wxAuiToolBarEvent& event);
         void OnGameFS2011Select     (wxCommandEvent& event);
         void OnGameFS2013Select     (wxCommandEvent& event);
+        void OnRCMAddSelect         (wxCommandEvent& event);
+        void OnRCMInsertSelect      (wxCommandEvent& event);
+        void OnRCMDeleteSelect      (wxCommandEvent& event);
+        void OnRCMFillSelect        (wxCommandEvent& event);
 
     private:
         bool            courseListSelectedAll;
+        bool            rightClickMenuOpen;
+
         int             courseListSelectedIndex;
+        int             mousePosX;
+        int             mousePosY;
+
         wxPNGResource   res;
 
+        wxBitmap TbIcon_Add;
+        wxBitmap TbIcon_Insert;
+        wxBitmap TbIcon_Delete;
+        wxBitmap TbIcon_FillOut;
         wxBitmap TbIcon_FS2011;
         wxBitmap TbIcon_FS2013;
 
         static const long Game_FarmingSimulator2011;
         static const long Game_FarmingSimulator2013;
+        static const long RightClickMenu_Add;
+        static const long RightClickMenu_Insert;
+        static const long RightClickMenu_Delete;
+        static const long RightClickMenu_FillOut;
 
     private:
 
@@ -73,6 +90,13 @@ class Courseplay_EditorFrame: public wxFrame
         void OnWpPropReverseClick(wxCommandEvent& event);
         void OnWpPropWaitPointClick(wxCommandEvent& event);
         void OnWpPropCrossingClick(wxCommandEvent& event);
+        void OnMainWindowRightDown(wxMouseEvent& event);
+        void OnLoadCoursesSelected(wxCommandEvent& event);
+        void OnSaveCoursesSelected(wxCommandEvent& event);
+        void OnUndoSelected(wxCommandEvent& event);
+        void OnRedoSelected(wxCommandEvent& event);
+        void OnSettingsSelected(wxCommandEvent& event);
+        void OnManualSelected(wxCommandEvent& event);
         //*)
 
         //(*Identifiers(Courseplay_EditorFrame)
@@ -81,6 +105,8 @@ class Courseplay_EditorFrame: public wxFrame
         static const long ID_TLB1_BTN_DELETE;
         static const long ID_TLB1_BTN_FILL;
         static const long ID_TLB1_BTN_GAME_SELECT;
+        static const long ID_TOOL_UNDO;
+        static const long ID_TOOL_REDO;
         static const long TLB_1;
         static const long ID_Main_Window;
         static const long ID_COURSELISTBOX;
@@ -105,6 +131,10 @@ class Courseplay_EditorFrame: public wxFrame
         static const long ID_File_Load;
         static const long ID_File_Save;
         static const long idMenuQuit;
+        static const long ID_EDIT_Undo;
+        static const long ID_EDIT_Redo;
+        static const long ID_EDIT_Settings;
+        static const long ID_HELP_Manual;
         static const long idMenuAbout;
         static const long ID_STATUSBAR1;
         //*)
@@ -117,8 +147,9 @@ class Courseplay_EditorFrame: public wxFrame
         wxTextCtrl* wpPropPosX;
         wxStaticText* StaticText2;
         wxTextCtrl* wpPropAngle;
+        wxMenuItem* LoadCourses;
+        wxMenu* Menu3;
         wxPanel* panelCourseList;
-        wxMenuItem* MenuItem4;
         wxTextCtrl* courseName;
         wxCheckBox* wpPropWaitPoint;
         wxButton* selectAllCourse;
@@ -126,13 +157,17 @@ class Courseplay_EditorFrame: public wxFrame
         wxStaticText* StaticText1;
         wxStaticText* StaticText3;
         wxScrolledWindow* mainWindow;
-        wxMenuItem* MenuItem3;
+        wxMenuItem* Manual;
+        wxMenuItem* Redo;
         wxStaticText* StaticText5;
         wxStatusBar* StatusBar1;
         wxTextCtrl* wpPropSpeed;
         wxAuiToolBar* AuiTools1;
         wxTextCtrl* wpPropPosY;
+        wxMenuItem* Settings;
+        wxMenuItem* SaveCourses;
         wxStaticText* StaticText4;
+        wxMenuItem* Undo;
         wxCheckBox* wpPropCrossing;
         wxCheckBox* wpPropReverse;
         //*)
