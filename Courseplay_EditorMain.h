@@ -11,6 +11,7 @@
 #define COURSEPLAY_EDITORMAIN_H
 
 #include "wxPNGResource.h"
+//#include "Settings.h"
 
 //(*Headers(Courseplay_EditorFrame)
 #include <wx/scrolwin.h>
@@ -33,6 +34,8 @@ struct CheckListItem
     bool isChecked;
 };
 
+class Settings;
+
 class Courseplay_EditorFrame: public wxFrame
 {
     public:
@@ -50,6 +53,10 @@ class Courseplay_EditorFrame: public wxFrame
         void OnRCMInsertSelect      (wxCommandEvent& event);
         void OnRCMDeleteSelect      (wxCommandEvent& event);
         void OnRCMFillSelect        (wxCommandEvent& event);
+
+    private:
+        Settings *settings;
+        wxString defaultLayout;
 
     private:
         bool            courseListSelectedAll;
@@ -163,8 +170,8 @@ class Courseplay_EditorFrame: public wxFrame
         wxStatusBar* StatusBar1;
         wxTextCtrl* wpPropSpeed;
         wxAuiToolBar* AuiTools1;
+        wxMenuItem* CPE_Settings;
         wxTextCtrl* wpPropPosY;
-        wxMenuItem* Settings;
         wxMenuItem* SaveCourses;
         wxStaticText* StaticText4;
         wxMenuItem* Undo;

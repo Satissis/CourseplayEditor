@@ -26,9 +26,6 @@ FS2013             RCDATA         ".\\images\\FS2013.png"
 icon_Width         RCDATA         ".\\images\\Width.png"
 
 
-OldAppIcon         RCDATA         ".\\images\\Tractor.png"
-
-
 btn_Undo           RCDATA         ".\\images\\Undo.png"
 
 

@@ -9,6 +9,8 @@
 
 #include "Courseplay_EditorMain.h"
 #include <wx/msgdlg.h>
+#include "Settings.h"
+#include "version.h"
 
 //(*InternalHeaders(Courseplay_EditorFrame)
 #include <wx/bitmap.h>
@@ -110,6 +112,9 @@ END_EVENT_TABLE()
 
 Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
 {
+    // Init config.
+    settings = new Settings(this, _T("Courseplay Editor"));
+
     // Create images to use.
     wxBitmap MenuIcon_Exit      = res.GetBitmap(wxT("btn_Exit"),        MENU_ICON_SIZE, MENU_ICON_SIZE);
     wxBitmap MenuIcon_Undo      = res.GetBitmap(wxT("btn_Undo"),        MENU_ICON_SIZE, MENU_ICON_SIZE);
@@ -146,6 +151,8 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     courseNameValidator.SetIncludes(validatorIncludeList);
     courseNameValidator.SetBellOnError();
 
+
+
     //(*Initialize(Courseplay_EditorFrame)
     wxBoxSizer* BoxSizer4;
     wxMenuItem* MenuItem2;
@@ -159,9 +166,10 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     wxBoxSizer* BoxSizer3;
     wxMenu* Menu2;
 
-    Create(parent, wxID_ANY, _("Courseplay Editor"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
+    Create(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE, _T("wxID_ANY"));
     SetClientSize(wxSize(1066,582));
     SetIcon(wxICON(appIcon));
+    SetLabel(wxString::Format(_("Courseplay Editor - v%d.%d.%d"), EditorVersion::MAJOR, EditorVersion::MINOR, EditorVersion::BUILD));
     AuiManager1 = new wxAuiManager(this, wxAUI_MGR_TRANSPARENT_HINT|wxAUI_MGR_DEFAULT);
     AuiTools1 = new wxAuiToolBar(this, TLB_1, wxPoint(55,48), wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
     AuiTools1->AddTool(ID_TLB1_BTN_NEW, _("Add"), TbIcon_Add, wxNullBitmap, wxITEM_NORMAL, _("Add new waypoint"), _("Add new waypoint to the end of the route"), NULL);
@@ -220,7 +228,7 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     panelCourseList->SetSizer(BoxSizer1);
     BoxSizer1->Fit(panelCourseList);
     BoxSizer1->SetSizeHints(panelCourseList);
-    AuiManager1->AddPane(panelCourseList, wxAuiPaneInfo().Name(_T("PaneName")).DefaultPane().Caption(_("Course List")).CloseButton(false).Right().Resizable(false));
+    AuiManager1->AddPane(panelCourseList, wxAuiPaneInfo().Name(_T("PaneName")).Caption(_("Course List")).CaptionVisible().CloseButton(false).Right().TopDockable(false).BottomDockable(false).Resizable(false));
     panelWpProp = new wxPanel(this, ID_PANEL2, wxPoint(952,334), wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_PANEL2"));
     BoxSizer4 = new wxBoxSizer(wxVERTICAL);
     FlexGridSizer1 = new wxFlexGridSizer(4, 2, 0, 0);
@@ -263,7 +271,7 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     panelWpProp->SetSizer(BoxSizer4);
     BoxSizer4->Fit(panelWpProp);
     BoxSizer4->SetSizeHints(panelWpProp);
-    AuiManager1->AddPane(panelWpProp, wxAuiPaneInfo().Name(_T("wpProperty")).DefaultPane().Caption(_("Waypoint Info & Property")).CloseButton(false).Right().Resizable(false));
+    AuiManager1->AddPane(panelWpProp, wxAuiPaneInfo().Name(_T("wpProperty")).DefaultPane().Caption(_("Waypoint Info & Property")).CloseButton(false).Right().TopDockable(false).BottomDockable(false).Resizable(false));
     AuiManager1->Update();
     MenuBar1 = new wxMenuBar();
     Menu1 = new wxMenu();
@@ -285,9 +293,9 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     Redo->SetBitmap(MenuIcon_Redo);
     Menu3->Append(Redo);
     Menu3->AppendSeparator();
-    Settings = new wxMenuItem(Menu3, ID_EDIT_Settings, _("Settings"), _("Settings"), wxITEM_NORMAL);
-    Settings->SetBitmap(MenuIcon_Settings);
-    Menu3->Append(Settings);
+    CPE_Settings = new wxMenuItem(Menu3, ID_EDIT_Settings, _("Settings"), _("Settings"), wxITEM_NORMAL);
+    CPE_Settings->SetBitmap(MenuIcon_Settings);
+    Menu3->Append(CPE_Settings);
     MenuBar1->Append(Menu3, _("&Edit"));
     Menu2 = new wxMenu();
     Manual = new wxMenuItem(Menu2, ID_HELP_Manual, _("Manual (Not implemented)"), _("Manual on how Courseplay Editor works"), wxITEM_NORMAL);
@@ -329,7 +337,11 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&Courseplay_EditorFrame::OnClose);
     //*)
 
-
+    // TODO: move defaultLayout into a Settings function.
+    defaultLayout = AuiManager1->SavePerspective();
+    if (settings->Exists(_T("GUI/layout")))
+        AuiManager1->LoadPerspective(settings->Read(_T("GUI/layout")));
+    //settings->Write(_T("GUI/layout"), AuiManager1->SavePerspective());
 }
 
 Courseplay_EditorFrame::~Courseplay_EditorFrame()
@@ -353,6 +365,11 @@ void Courseplay_EditorFrame::OnAbout(wxCommandEvent& event)
 
 void Courseplay_EditorFrame::OnClose(wxCloseEvent& event)
 {
+    //delete wxConfigBase::Set((wxConfigBase *) NULL);
+    // TODO: Save all settings before closing.
+    settings->Write(_T("GUI/layout"), AuiManager1->SavePerspective());
+
+    delete settings;
     Destroy();
 }
 
