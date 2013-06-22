@@ -11,7 +11,7 @@
 #define COURSEPLAY_EDITORMAIN_H
 
 #include "wxPNGResource.h"
-//#include "Settings.h"
+#include "Variables.h"
 
 //(*Headers(Courseplay_EditorFrame)
 #include <wx/scrolwin.h>
@@ -38,13 +38,13 @@ class Settings;
 
 class Courseplay_EditorFrame: public wxFrame
 {
-    public:
+    public: // Functions
 
         Courseplay_EditorFrame(wxWindow* parent,wxWindowID id = -1);
         virtual ~Courseplay_EditorFrame();
 
 
-    public:
+    public: // Event Functions
         void OnBtnFillOutDropdown   (wxAuiToolBarEvent& event);
         void OnBtnGameSelectDropdown(wxAuiToolBarEvent& event);
         void OnGameFS2011Select     (wxCommandEvent& event);
@@ -54,11 +54,17 @@ class Courseplay_EditorFrame: public wxFrame
         void OnRCMDeleteSelect      (wxCommandEvent& event);
         void OnRCMFillSelect        (wxCommandEvent& event);
 
-    private:
+    public: // Variables
+
+
+    private: // Functions
+        void ifFirstTimeSetup(void);
+
+
+    private: // Variables
         Settings *settings;
         wxString defaultLayout;
 
-    private:
         bool            courseListSelectedAll;
         bool            rightClickMenuOpen;
 
@@ -72,8 +78,7 @@ class Courseplay_EditorFrame: public wxFrame
         wxBitmap TbIcon_Insert;
         wxBitmap TbIcon_Delete;
         wxBitmap TbIcon_FillOut;
-        wxBitmap TbIcon_FS2011;
-        wxBitmap TbIcon_FS2013;
+        wxBitmap TbIcon_Games[NumOfFSGames];
 
         static const long Game_FarmingSimulator2011;
         static const long Game_FarmingSimulator2013;
@@ -82,7 +87,7 @@ class Courseplay_EditorFrame: public wxFrame
         static const long RightClickMenu_Delete;
         static const long RightClickMenu_FillOut;
 
-    private:
+    private: // Code::Block handles this section.
 
         //(*Handlers(Courseplay_EditorFrame)
         void OnQuit(wxCommandEvent& event);
@@ -147,10 +152,10 @@ class Courseplay_EditorFrame: public wxFrame
         //*)
 
         //(*Declarations(Courseplay_EditorFrame)
-        wxAuiManager* AuiManager1;
         wxCheckListBox* courseList;
         wxButton* moveCourseDown;
         wxButton* moveCourseUp;
+        wxAuiManager* m_mgr;
         wxTextCtrl* wpPropPosX;
         wxStaticText* StaticText2;
         wxTextCtrl* wpPropAngle;
