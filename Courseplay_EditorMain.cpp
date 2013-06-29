@@ -13,6 +13,7 @@
 #include "version.h"
 
 //(*InternalHeaders(Courseplay_EditorFrame)
+#include <wx/artprov.h>
 #include <wx/bitmap.h>
 #include <wx/intl.h>
 #include <wx/image.h>
@@ -50,7 +51,6 @@ const long Courseplay_EditorFrame::ID_TLB1_BTN_NEW = wxNewId();
 const long Courseplay_EditorFrame::ID_TLB1_BTN_INSERT = wxNewId();
 const long Courseplay_EditorFrame::ID_TLB1_BTN_DELETE = wxNewId();
 const long Courseplay_EditorFrame::ID_TLB1_BTN_FILL = wxNewId();
-const long Courseplay_EditorFrame::ID_TLB1_BTN_GAME_SELECT = wxNewId();
 const long Courseplay_EditorFrame::ID_TOOL_UNDO = wxNewId();
 const long Courseplay_EditorFrame::ID_TOOL_REDO = wxNewId();
 const long Courseplay_EditorFrame::TLB_1 = wxNewId();
@@ -74,8 +74,11 @@ const long Courseplay_EditorFrame::ID_CHECKBOX1 = wxNewId();
 const long Courseplay_EditorFrame::ID_CHECKBOX2 = wxNewId();
 const long Courseplay_EditorFrame::ID_CHECKBOX3 = wxNewId();
 const long Courseplay_EditorFrame::ID_PANEL2 = wxNewId();
-const long Courseplay_EditorFrame::ID_File_Load = wxNewId();
-const long Courseplay_EditorFrame::ID_File_Save = wxNewId();
+const long Courseplay_EditorFrame::ID_TLB2_BTN_GAME_SELECT = wxNewId();
+const long Courseplay_EditorFrame::ID_TLB2_COMBOX_SAVEGAMESELECT = wxNewId();
+const long Courseplay_EditorFrame::ID_TLB2_BTN_RELOAD = wxNewId();
+const long Courseplay_EditorFrame::ID_TLB2_BTN_SAVESAVEGAME = wxNewId();
+const long Courseplay_EditorFrame::TLB_2 = wxNewId();
 const long Courseplay_EditorFrame::idMenuQuit = wxNewId();
 const long Courseplay_EditorFrame::ID_EDIT_Undo = wxNewId();
 const long Courseplay_EditorFrame::ID_EDIT_Redo = wxNewId();
@@ -99,7 +102,7 @@ BEGIN_EVENT_TABLE(Courseplay_EditorFrame,wxFrame)
     //(*EventTable(Courseplay_EditorFrame)
     //*)
     EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_TLB1_BTN_FILL,          Courseplay_EditorFrame::OnBtnFillOutDropdown)
-    EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_TLB1_BTN_GAME_SELECT,   Courseplay_EditorFrame::OnBtnGameSelectDropdown)
+    EVT_AUITOOLBAR_TOOL_DROPDOWN(ID_TLB2_BTN_GAME_SELECT,   Courseplay_EditorFrame::OnBtnGameSelectDropdown)
 
     EVT_MENU                    (Game_FarmingSimulator2011, Courseplay_EditorFrame::OnGameFS2011Select)
     EVT_MENU                    (Game_FarmingSimulator2013, Courseplay_EditorFrame::OnGameFS2013Select)
@@ -112,6 +115,16 @@ END_EVENT_TABLE()
 
 Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
 {
+    // set default variables
+    courseListSelectedAll   = false;
+    rightClickMenuOpen      = false;
+    courseListSelectedIndex = -1;
+    mousePosX               = 0;
+    mousePosY               = 0;
+    for (int i = 0; i < NumOfFSGames; i++)
+    {
+        TbIcon_Games[i] = wxNullBitmap;
+    }
 
     // Create images to use.
     wxBitmap MenuIcon_Exit      = res.GetBitmap(wxT("btn_Exit"),        MENU_ICON_SIZE, MENU_ICON_SIZE);
@@ -120,19 +133,14 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     wxBitmap MenuIcon_Settings  = res.GetBitmap(wxT("btn_Settings"),    MENU_ICON_SIZE, MENU_ICON_SIZE);
     wxBitmap MenuIcon_Help      = res.GetBitmap(wxT("btn_Help"),        MENU_ICON_SIZE, MENU_ICON_SIZE);
 
-    TbIcon_Add              = res.GetBitmap(wxT("btn_Add"),     TB_ICON_SIZE, TB_ICON_SIZE);
-    TbIcon_Insert           = res.GetBitmap(wxT("btn_Insert"),  TB_ICON_SIZE, TB_ICON_SIZE);
-    TbIcon_Delete           = res.GetBitmap(wxT("btn_Delete"),  TB_ICON_SIZE, TB_ICON_SIZE);
-    TbIcon_FillOut          = res.GetBitmap(wxT("btn_FillOut"), TB_ICON_SIZE, TB_ICON_SIZE);
-    TbIcon_Games[FS2011]    = res.GetBitmap(wxT("FS2011"),      TB_ICON_SIZE, TB_ICON_SIZE);
-    TbIcon_Games[FS2013]    = res.GetBitmap(wxT("FS2013"),      TB_ICON_SIZE, TB_ICON_SIZE);
-
-    // set default variables
-    courseListSelectedAll   = false;
-    rightClickMenuOpen      = false;
-    courseListSelectedIndex = -1;
-    mousePosX               = 0;
-    mousePosY               = 0;
+    wxBitmap TbIcon_Reload      = res.GetBitmap(wxT("btn_Reload"),  TB_ICON_SIZE, TB_ICON_SIZE);
+    wxBitmap TbIcon_Save        = res.GetBitmap(wxT("btn_Save"),    TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_Add                  = res.GetBitmap(wxT("btn_Add"),     TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_Insert               = res.GetBitmap(wxT("btn_Insert"),  TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_Delete               = res.GetBitmap(wxT("btn_Delete"),  TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_FillOut              = res.GetBitmap(wxT("btn_FillOut"), TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_Games[FS2011]        = res.GetBitmap(wxT("FS2011"),      TB_ICON_SIZE, TB_ICON_SIZE);
+    TbIcon_Games[FS2013]        = res.GetBitmap(wxT("FS2013"),      TB_ICON_SIZE, TB_ICON_SIZE);
 
     // Create a input text validator
     wxArrayString validatorIncludeList;
@@ -168,24 +176,20 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     SetClientSize(wxSize(1066,582));
     SetIcon(wxICON(appIcon));
     SetLabel(wxString::Format(_("Courseplay Editor - v%d.%d.%d"), EditorVersion::MAJOR, EditorVersion::MINOR, EditorVersion::BUILD));
-    m_mgr = new wxAuiManager(this, wxAUI_MGR_TRANSPARENT_DRAG|wxAUI_MGR_TRANSPARENT_HINT|wxAUI_MGR_DEFAULT);
+    m_mgr = new wxAuiManager(this, wxAUI_MGR_TRANSPARENT_HINT|wxAUI_MGR_DEFAULT);
     AuiTools1 = new wxAuiToolBar(this, TLB_1, wxPoint(55,48), wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
-    AuiTools1->AddTool(ID_TLB1_BTN_NEW, _("Add"), TbIcon_Add, wxNullBitmap, wxITEM_NORMAL, _("Add new waypoint"), _("Add new waypoint to the end of the route"), NULL);
-    AuiTools1->AddTool(ID_TLB1_BTN_INSERT, _("Insert"), TbIcon_Insert, wxNullBitmap, wxITEM_NORMAL, _("Insert a waypoint"), _("Insert a waypoint before the selected waypoint."), NULL);
+    AuiTools1->AddTool(ID_TLB1_BTN_NEW, _("Add"), TbIcon_Add, wxNullBitmap, wxITEM_NORMAL, _("Add new waypoint."), _("Add new waypoint to the end of the route"), NULL);
+    AuiTools1->AddTool(ID_TLB1_BTN_INSERT, _("Insert"), TbIcon_Insert, wxNullBitmap, wxITEM_NORMAL, _("Insert waypoint."), _("Insert a waypoint before the selected waypoint."), NULL);
     AuiTools1->AddTool(ID_TLB1_BTN_DELETE, _("Delete Waypoint"), TbIcon_Delete, wxNullBitmap, wxITEM_NORMAL, _("Delete selected waypoint."), wxEmptyString, NULL);
-    AuiTools1->AddTool(ID_TLB1_BTN_FILL, _("Fill Out"), TbIcon_FillOut, wxNullBitmap, wxITEM_NORMAL, _("Fill Out"), _("Insert waypoints between the selected waypoint to the previus waypoint."), NULL);
+    AuiTools1->AddTool(ID_TLB1_BTN_FILL, _("Fill Out"), TbIcon_FillOut, wxNullBitmap, wxITEM_NORMAL, _("Fill Out"), _("Insert waypoints between the selected waypoint to the previus waypoint with a given distance."), NULL);
     AuiTools1->SetToolDropDown(ID_TLB1_BTN_FILL, true);
     AuiTools1->AddSeparator();
-    AuiTools1->AddTool(ID_TLB1_BTN_GAME_SELECT, _("Game Select"), TbIcon_Games[FS2013], wxNullBitmap, wxITEM_NORMAL, _("Game Select"), wxEmptyString, NULL);
-    AuiTools1->SetToolDropDown(ID_TLB1_BTN_GAME_SELECT, true);
-    AuiTools1->EnableTool(ID_TLB1_BTN_GAME_SELECT, false);
-    AuiTools1->AddSeparator();
-    AuiTools1->AddTool(ID_TOOL_UNDO, _("Undo"), MenuIcon_Undo, wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL);
-    AuiTools1->AddTool(ID_TOOL_REDO, _("Redo"), MenuIcon_Redo, wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL);
+    AuiTools1->AddTool(ID_TOOL_UNDO, _("Undo"), MenuIcon_Undo, wxNullBitmap, wxITEM_NORMAL, _("Undo"), wxEmptyString, NULL);
+    AuiTools1->AddTool(ID_TOOL_REDO, _("Redo"), MenuIcon_Redo, wxNullBitmap, wxITEM_NORMAL, _("Redo"), wxEmptyString, NULL);
     AuiTools1->Realize();
-    m_mgr->AddPane(AuiTools1, wxAuiPaneInfo().Name(_T("TLB_1")).ToolbarPane().Caption(_("Pane caption")).CloseButton(false).Layer(10).Top().LeftDockable(false).RightDockable(false).Gripper());
+    m_mgr->AddPane(AuiTools1, wxAuiPaneInfo().Name(_T("TLB_1")).ToolbarPane().CloseButton(false).Layer(10).Top().LeftDockable(false).RightDockable(false).Gripper());
     mainWindow = new wxScrolledWindow(this, ID_Main_Window, wxPoint(367,283), wxDefaultSize, wxSTATIC_BORDER|wxVSCROLL|wxHSCROLL|wxALWAYS_SHOW_SB|wxFULL_REPAINT_ON_RESIZE, _T("ID_Main_Window"));
-    m_mgr->AddPane(mainWindow, wxAuiPaneInfo().Name(_T("mainWindow")).CenterPane().Caption(_("Pane caption")));
+    m_mgr->AddPane(mainWindow, wxAuiPaneInfo().Name(_T("mainWindow")).CenterPane());
     panelCourseList = new wxPanel(this, ID_PANEL1, wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER, _T("ID_PANEL1"));
     BoxSizer1 = new wxBoxSizer(wxVERTICAL);
     courseList = new wxCheckListBox(panelCourseList, ID_COURSELISTBOX, wxDefaultPosition, wxSize(200,124), 0, 0, wxVSCROLL|wxALWAYS_SHOW_SB, wxDefaultValidator, _T("ID_COURSELISTBOX"));
@@ -232,23 +236,23 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     BoxSizer4 = new wxBoxSizer(wxVERTICAL);
     FlexGridSizer1 = new wxFlexGridSizer(4, 2, 0, 0);
     FlexGridSizer1->AddGrowableCol(1);
-    StaticText2 = new wxStaticText(panelWpProp, ID_STATICTEXT2, _("Pos X"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT2"));
-    FlexGridSizer1->Add(StaticText2, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText2 = new wxStaticText(panelWpProp, ID_STATICTEXT2, _("Pos X"), wxDefaultPosition, wxSize(29,13), wxST_NO_AUTORESIZE, _T("ID_STATICTEXT2"));
+    FlexGridSizer1->Add(StaticText2, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     wpPropPosX = new wxTextCtrl(panelWpProp, ID_TEXTCTRL1, wxEmptyString, wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_TEXTCTRL1"));
     wpPropPosX->Disable();
     FlexGridSizer1->Add(wpPropPosX, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    StaticText3 = new wxStaticText(panelWpProp, ID_STATICTEXT3, _("Pos Y"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT3"));
-    FlexGridSizer1->Add(StaticText3, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText3 = new wxStaticText(panelWpProp, ID_STATICTEXT3, _("Pos Y"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT3"));
+    FlexGridSizer1->Add(StaticText3, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     wpPropPosY = new wxTextCtrl(panelWpProp, ID_TEXTCTRL2, wxEmptyString, wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_TEXTCTRL2"));
     wpPropPosY->Disable();
     FlexGridSizer1->Add(wpPropPosY, 0, wxTOP|wxBOTTOM|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
-    StaticText5 = new wxStaticText(panelWpProp, ID_STATICTEXT5, _("Angle"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT5"));
-    FlexGridSizer1->Add(StaticText5, 0, wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText5 = new wxStaticText(panelWpProp, ID_STATICTEXT5, _("Angle"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT5"));
+    FlexGridSizer1->Add(StaticText5, 0, wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     wpPropAngle = new wxTextCtrl(panelWpProp, ID_TEXTCTRL3, wxEmptyString, wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_TEXTCTRL3"));
     wpPropAngle->Disable();
     FlexGridSizer1->Add(wpPropAngle, 0, wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 5);
-    StaticText4 = new wxStaticText(panelWpProp, ID_STATICTEXT4, _("Speed"), wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICTEXT4"));
-    FlexGridSizer1->Add(StaticText4, 0, wxTOP|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    StaticText4 = new wxStaticText(panelWpProp, ID_STATICTEXT4, _("Speed"), wxDefaultPosition, wxDefaultSize, wxST_NO_AUTORESIZE, _T("ID_STATICTEXT4"));
+    FlexGridSizer1->Add(StaticText4, 0, wxTOP|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     wpPropSpeed = new wxTextCtrl(panelWpProp, ID_TEXTCTRL4, wxEmptyString, wxDefaultPosition, wxSize(150,-1), 0, wxDefaultValidator, _T("ID_TEXTCTRL4"));
     wpPropSpeed->Disable();
     FlexGridSizer1->Add(wpPropSpeed, 0, wxTOP|wxALIGN_RIGHT|wxALIGN_CENTER_VERTICAL, 2);
@@ -271,15 +275,21 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     BoxSizer4->Fit(panelWpProp);
     BoxSizer4->SetSizeHints(panelWpProp);
     m_mgr->AddPane(panelWpProp, wxAuiPaneInfo().Name(_T("wpProperty")).DefaultPane().Caption(_("Waypoint Info & Property")).CloseButton(false).Right().TopDockable(false).BottomDockable(false).Resizable(false));
+    AuiTools2 = new wxAuiToolBar(this, TLB_2, wxPoint(222,10), wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
+    SavegameSelect = new wxComboBox(AuiTools2, ID_TLB2_COMBOX_SAVEGAMESELECT, wxEmptyString, wxPoint(32,20), wxSize(170,21), 0, 0, wxCB_SIMPLE|wxCB_READONLY|wxCB_DROPDOWN, wxDefaultValidator, _T("ID_TLB2_COMBOX_SAVEGAMESELECT"));
+    SavegameSelect->SetSelection( SavegameSelect->Append(_("No savegame loaded")) );
+    SavegameSelect->Append(_("01: Hagstad"));
+    SavegameSelect->Append(_("02: Two Rivers"));
+    AuiTools2->AddTool(ID_TLB2_BTN_GAME_SELECT, _("Item label"), TbIcon_Games[FS2013], wxNullBitmap, wxITEM_NORMAL, _("Game Select"), wxEmptyString, NULL);
+    AuiTools2->SetToolDropDown(ID_TLB2_BTN_GAME_SELECT, true);
+    AuiTools2->AddControl(SavegameSelect, _("Item label"));
+    AuiTools2->AddTool(ID_TLB2_BTN_RELOAD, _("Reload"), TbIcon_Reload, wxNullBitmap, wxITEM_NORMAL, _("Reload Savegame"), wxEmptyString, NULL);
+    AuiTools2->AddTool(ID_TLB2_BTN_SAVESAVEGAME, _("Save"), TbIcon_Save, wxNullBitmap, wxITEM_NORMAL, _("Save Savegame"), wxEmptyString, NULL);
+    AuiTools2->Realize();
+    m_mgr->AddPane(AuiTools2, wxAuiPaneInfo().Name(_T("TLB_2")).ToolbarPane().CloseButton(false).Layer(10).Top().LeftDockable(false).RightDockable(false).Gripper());
     m_mgr->Update();
     MenuBar1 = new wxMenuBar();
     Menu1 = new wxMenu();
-    LoadCourses = new wxMenuItem(Menu1, ID_File_Load, _("&Load Courses"), _("Load route from a savegame"), wxITEM_NORMAL);
-    Menu1->Append(LoadCourses);
-    SaveCourses = new wxMenuItem(Menu1, ID_File_Save, _("&Save Courses"), _("Save the loaded routes"), wxITEM_NORMAL);
-    Menu1->Append(SaveCourses);
-    SaveCourses->Enable(false);
-    Menu1->AppendSeparator();
     MenuItem1 = new wxMenuItem(Menu1, idMenuQuit, _("E&xit\tAlt-F4"), _("Close Courseplay Editor"), wxITEM_NORMAL);
     MenuItem1->SetBitmap(MenuIcon_Exit);
     Menu1->Append(MenuItem1);
@@ -302,6 +312,7 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     Menu2->Append(Manual);
     Menu2->AppendSeparator();
     MenuItem2 = new wxMenuItem(Menu2, idMenuAbout, _("About\tF1"), _("Show info about this application"), wxITEM_NORMAL);
+    MenuItem2->SetBitmap(wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_HELP")),wxART_MENU));
     Menu2->Append(MenuItem2);
     MenuBar1->Append(Menu2, _("Help"));
     SetMenuBar(MenuBar1);
@@ -325,8 +336,6 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     Connect(ID_CHECKBOX1,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnWpPropReverseClick);
     Connect(ID_CHECKBOX2,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnWpPropWaitPointClick);
     Connect(ID_CHECKBOX3,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnWpPropCrossingClick);
-    Connect(ID_File_Load,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnLoadCoursesSelected);
-    Connect(ID_File_Save,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnSaveCoursesSelected);
     Connect(idMenuQuit,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnQuit);
     Connect(ID_EDIT_Undo,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnUndoSelected);
     Connect(ID_EDIT_Redo,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnRedoSelected);
@@ -337,22 +346,16 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     //*)
 
     // Init settings.
-    settings = new Settings(this, m_mgr, _T("Courseplay Editor"));
+    settings = new Settings(this, m_mgr);
+    settings->loadLocale();
 
-    // TODO: move defaultLayout into a Settings function.
     settings->saveDefaultLayout(m_mgr->SavePerspective());
-    //defaultLayout = m_mgr->SavePerspective();
+
     if (settings->Exists(_T("GUI/layout")))
         m_mgr->LoadPerspective(settings->Read(_T("GUI/layout")));
-    //settings->Write(_T("GUI/layout"), m_mgr->SavePerspective());
 
-    //settings->showSettings();
-
-    //SetStatusText(settings->gameLocations[0].savegameLocation);
-
-    // Check if first time setup have been done.
-    // If not, it will prompt it.
-    ifFirstTimeSetup();
+    // Make sure all toolbar2 is up to date
+    updateToolbar2();
 }
 
 Courseplay_EditorFrame::~Courseplay_EditorFrame()
@@ -382,9 +385,7 @@ void Courseplay_EditorFrame::OnClose(wxCloseEvent& event)
 
     delete settings;
     Destroy();
-}
-
-void Courseplay_EditorFrame::OnCourseListToggled(wxCommandEvent& event)
+}void Courseplay_EditorFrame::OnCourseListToggled(wxCommandEvent& event)
 {
     courseListSelectedAll = true;
 
@@ -446,7 +447,7 @@ void Courseplay_EditorFrame::OnCourseNameEnter(wxCommandEvent& event)
 
 void Courseplay_EditorFrame::OnMoveCourseUpClick(wxCommandEvent& event)
 {
-    int oldpos = courseListSelectedIndex; // need this for the list to update.
+    //int oldpos = courseListSelectedIndex; // need this for the list to update.
 
     CheckListItem item;
     item.text = courseList->GetString(courseListSelectedIndex);
@@ -469,7 +470,7 @@ void Courseplay_EditorFrame::OnMoveCourseUpClick(wxCommandEvent& event)
 
 void Courseplay_EditorFrame::OnMoveCourseDownClick(wxCommandEvent& event)
 {
-    int oldpos = courseListSelectedIndex; // need this for the list to update.
+    //int oldpos = courseListSelectedIndex; // need this for the list to update.
 
     CheckListItem item;
     item.text = courseList->GetString(courseListSelectedIndex);
@@ -568,10 +569,14 @@ void Courseplay_EditorFrame::OnBtnGameSelectDropdown(wxAuiToolBarEvent& event)
         wxMenuItem* m1 =  new wxMenuItem(&menuPopup, Game_FarmingSimulator2011, _("Farming Simulator 2011"));
         m1->SetBitmap(TbIcon_Games[FS2011]);
         menuPopup.Append(m1);
+        if (!settings->gameIsEnabled[FS2011])
+            m1->Enable(false);
 
         wxMenuItem* m2 =  new wxMenuItem(&menuPopup, Game_FarmingSimulator2013, _("Farming Simulator 2013"));
         m2->SetBitmap(TbIcon_Games[FS2013]);
         menuPopup.Append(m2);
+        if (!settings->gameIsEnabled[FS2013])
+            m2->Enable(false);
 
         // line up our menu with the button
         wxRect rect = tb->GetToolRect(event.GetId());
@@ -587,17 +592,42 @@ void Courseplay_EditorFrame::OnBtnGameSelectDropdown(wxAuiToolBarEvent& event)
 
 void Courseplay_EditorFrame::OnGameFS2011Select(wxCommandEvent& event)
 {
-    AuiTools1->SetToolBitmap(ID_TLB1_BTN_GAME_SELECT, TbIcon_Games[FS2011]);
-
+    settings->setGameId(FS2011);
+    updateToolbar2();
 
     // TODO: Reset everything for game change to Farming Simulator 2011
 }
 
 void Courseplay_EditorFrame::OnGameFS2013Select(wxCommandEvent& event)
 {
-    AuiTools1->SetToolBitmap(ID_TLB1_BTN_GAME_SELECT, TbIcon_Games[FS2013]);
+    settings->setGameId(FS2013);
+    updateToolbar2();
 
     // TODO: Reset everything for game change to Farming Simulator 2013
+}
+
+void Courseplay_EditorFrame::updateToolbar2(void)
+{
+    if (settings->selectedGameId >= 0)
+    {
+        if (!TbIcon_Games[settings->selectedGameId].IsNull())
+            AuiTools2->SetToolBitmap(ID_TLB2_BTN_GAME_SELECT, TbIcon_Games[settings->selectedGameId]);
+        else
+        {
+            wxSize sizer(TB_ICON_SIZE, TB_ICON_SIZE);
+            wxBitmap tempIcon = wxArtProvider::GetBitmap(wxART_MAKE_ART_ID_FROM_STR(_T("wxART_MISSING_IMAGE")), wxART_OTHER, sizer);
+            AuiTools2->SetToolBitmap(ID_TLB2_BTN_GAME_SELECT, tempIcon);
+        }
+
+        AuiTools2->EnableTool(ID_TLB2_BTN_GAME_SELECT, true);
+    }
+    else
+    {
+        AuiTools2->EnableTool(ID_TLB2_BTN_GAME_SELECT, false);
+    }
+
+    // Make sure the toolbar is up to date
+    AuiTools2->Refresh();
 }
 
 void Courseplay_EditorFrame::OnMainWindowRightDown(wxMouseEvent& event)
@@ -649,16 +679,6 @@ void Courseplay_EditorFrame::OnRCMFillSelect(wxCommandEvent& event)
     // TODO: Implement right click menu Fill Out Select
 }
 
-void Courseplay_EditorFrame::OnLoadCoursesSelected(wxCommandEvent& event)
-{
-    // TODO: Load courseplay.xml
-}
-
-void Courseplay_EditorFrame::OnSaveCoursesSelected(wxCommandEvent& event)
-{
-    // TODO: Save to courseplay.xml
-}
-
 void Courseplay_EditorFrame::OnUndoSelected(wxCommandEvent& event)
 {
     // TODO: Implement undo
@@ -673,7 +693,6 @@ void Courseplay_EditorFrame::OnRedoSelected(wxCommandEvent& event)
 
 void Courseplay_EditorFrame::OnSettingsSelected(wxCommandEvent& event)
 {
-    // TODO: Add setting
     settings->showSettings();
 }
 
@@ -682,76 +701,3 @@ void Courseplay_EditorFrame::OnManualSelected(wxCommandEvent& event)
     // TODO: Add manual
 }
 
-void Courseplay_EditorFrame::ifFirstTimeSetup(void)
-{
-    bool doneFirstTimeSetup;
-    settings->Read(_T("/General/DoneFirstTimeSetup"), &doneFirstTimeSetup, false);
-
-    if (!doneFirstTimeSetup)
-    {
-        // Ask to auto detect locations
-        wxString msg = wxEmptyString;
-        msg += _("Do you want Courseplay Editor to try to auto detect where Farming Simulator(s) install and savegame locations are?\n\n");
-        msg += _("If you select (No) you can set the install and savegame locations under Edit->Settings");
-        int answer = wxMessageBox(msg, _("First Time Setup"), wxYES_NO | wxICON_QUESTION, this);
-
-        if (answer == wxYES)
-        {
-            bool fs2011FoundInstallPath = settings->findInstallPath (FS2011);
-            bool fs2011FoundSavePath    = settings->findSavegamePath(FS2011);
-            bool fs2013FoundInstallPath = settings->findInstallPath (FS2013);
-            bool fs2013FoundSavePath    = settings->findSavegamePath(FS2013);
-
-            // Enable game if both path is found.
-            settings->enableGameIfFound(FS2011);
-            settings->enableGameIfFound(FS2013);
-
-            // Show result of auto detect.
-            if (fs2011FoundInstallPath || fs2011FoundSavePath ||
-                fs2013FoundInstallPath || fs2013FoundSavePath)
-            {
-                bool addExtraDescription = false;
-                msg = wxEmptyString;
-                //msg += _("Courseplay Editor found:\n");
-                if (fs2011FoundInstallPath && fs2011FoundSavePath)
-                    msg += _("Found all Farming Simulator 2011 Locations\n");
-                else if (fs2011FoundInstallPath && !fs2011FoundSavePath)
-                {
-                    msg += _("Found Farming Simulator 2011 install location, but did not find the savegame location\n");
-                    addExtraDescription = true;
-                }
-                else if (!fs2011FoundInstallPath && fs2011FoundSavePath)
-                {
-                    msg += _("Found Farming Simulator 2011 savegame location but did not find the install location\n");
-                    addExtraDescription = true;
-                }
-
-
-                if (fs2013FoundInstallPath && fs2013FoundSavePath)
-                    msg += _("Found all Farming Simulator 2013 Locations\n");
-                else if (fs2013FoundInstallPath && !fs2013FoundSavePath)
-                {
-                    msg += _("Found Farming Simulator 2013 install location, but did not find the savegame location\n");
-                    addExtraDescription = true;
-                }
-                else if (!fs2013FoundInstallPath && fs2013FoundSavePath)
-                {
-                    msg += _("Found Farming Simulator 2013 savegame location but did not find the install location\n");
-                    addExtraDescription = true;
-                }
-
-                if (addExtraDescription)
-                    msg += _("\nYou can manually select the install and savegame location under Edit->Settings menu if you have one of the game installed.");
-            }
-            else
-            {
-                msg = wxEmptyString;
-                msg += _("Courseplay Editor did not find any Farming Simulator games.\n");
-                msg += _("\nYou can manually select the install and savegame location under Edit->Settings menu if you have one of the game installed.");
-            }
-            wxMessageBox(msg, _("Courseplay Editor Auto Detect Result"), wxOK, this);
-        }
-
-        settings->Write(_T("/General/DoneFirstTimeSetup"), true);
-    }
-}

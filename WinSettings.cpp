@@ -1,7 +1,6 @@
 #include "WinSettings.h"
 
-WinSettings::WinSettings(const wxString& appName)
-    : wxConfig(appName)
+CoreSettings::CoreSettings()
 {
     // Add search pattern for fs2011
     gameLocations[FS2011].game = wxT("FS2011");
@@ -32,11 +31,11 @@ WinSettings::WinSettings(const wxString& appName)
     gameLocations[FS2013].savegameLocation = _T("\\My Games\\FarmingSimulator2013");
 }
 
-WinSettings::~WinSettings()
+CoreSettings::~CoreSettings()
 {
 }
 
-wxString WinSettings::doFindInstallPath(FarmingSimulatorGames gameId)
+wxString CoreSettings::doFindInstallPath(FarmingSimulatorGames gameId)
 {
     // Create main search reg keys
     wxRegKey *MainRegKey = new wxRegKey(_T("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall"));
@@ -97,7 +96,7 @@ wxString WinSettings::doFindInstallPath(FarmingSimulatorGames gameId)
     return wxEmptyString;
 }
 
-wxString WinSettings::doFindSavegamePath(FarmingSimulatorGames gameId)
+wxString CoreSettings::doFindSavegamePath(FarmingSimulatorGames gameId)
 {
     // Create Document search reg key
     wxRegKey Documents(_T("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders"));

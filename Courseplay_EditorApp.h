@@ -16,6 +16,14 @@ class Courseplay_EditorApp : public wxApp
 {
     public:
         virtual bool OnInit();
+        //virtual int OnExit();
+        //void RecreateGUI();
+
+#ifdef __WXDEBUGLOG__
+        wxLog *logWindow;
+#endif
 };
+
+DECLARE_APP(Courseplay_EditorApp);
 
 #endif // COURSEPLAY_EDITORAPP_H

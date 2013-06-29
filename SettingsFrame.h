@@ -29,22 +29,26 @@ class SettingsFrame: public wxFrame
 		SettingsFrame(Settings* conf, wxAuiManager *m_mgr, wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~SettingsFrame();
 
-		void updateTapPanels(void);
-		void updateBtnFS11AutoDetect(void);
-		void updateBtnFS13AutoDetect(void);
 		void autoDetectPath(FarmingSimulatorGames gameId);
+		void updateBtnFS11AutoDetect();
+		void updateBtnFS13AutoDetect();
+		bool updateLanguageList();
+		void updateTapPanels();
 
     private:
-        Settings        *config;
-        wxAuiManager    *AuiMan;
+        Settings       *setup;
+        wxAuiManager   *AuiMan;
+        LangList        langList;
 
     public:
 
 		//(*Declarations(SettingsFrame)
 		wxButton* BtnResetUI;
 		wxButton* BtnClose;
+		wxStaticBox* StaticBox8;
 		wxStaticBox* StaticBox5;
 		wxButton* BtnSetLang;
+		wxListBox* LanguageList;
 		wxStaticBox* StaticBox7;
 		wxDirDialog* SelectPathDialog;
 		wxNotebook* SettingsTaps;
@@ -63,9 +67,9 @@ class SettingsFrame: public wxFrame
 		wxButton* BtnFS2011InstallPath;
 		wxTextCtrl* FS11InstallPath;
 		wxCheckBox* ChkBoxFS13Enabled;
+		wxCheckBox* CheckBox1;
 		wxStaticBox* StaticBox2;
 		wxPanel* FS2013Settings;
-		wxListBox* LangList;
 		wxCheckBox* ChkBoxFS11Enabled;
 		wxPanel* FS2011Settings;
 		wxStaticBox* StaticBox3;
@@ -80,6 +84,8 @@ class SettingsFrame: public wxFrame
 	protected:
 
 		//(*Identifiers(SettingsFrame)
+		static const long ID_STATICBOX8;
+		static const long ID_CHECKBOX1;
 		static const long ID_TAP_GENERAL;
 		static const long ID_STATICBOX2;
 		static const long ID_LANGLIST;

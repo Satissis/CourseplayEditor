@@ -18,4 +18,11 @@ struct GameSearchPaths
     wxString        savegameLocation;
 };
 
+struct LangList
+{
+    wxArrayString names;
+    wxArrayString fileNames;
+    wxArrayLong identifiers;
+};
+
 #endif // VARIABLES_H_INCLUDED

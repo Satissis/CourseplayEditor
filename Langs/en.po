@@ -1,0 +1,542 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Courseplay Editor\n"
+"POT-Creation-Date: 2013-06-28 17:57+0100\n"
+"PO-Revision-Date: 2013-06-28 17:58+0100\n"
+"Last-Translator: Claus G. Pedersen <claus_gade@adslhome.dk>\n"
+"Language-Team:  <claus_gade@adslhome.dk>\n"
+"Language: English\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.5\n"
+"X-Poedit-KeywordsList: _\n"
+"X-Poedit-Basepath: D:\\Documents\\CodeBlock\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-SearchPath-0: Courseplay Editor\n"
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:178
+#, c-format
+msgid "Courseplay Editor - v%d.%d.%d"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:181
+msgid "Add"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:181
+msgid "Add new waypoint."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:181
+msgid "Add new waypoint to the end of the route"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:182
+msgid "Insert"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:182
+msgid "Insert waypoint."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:182
+msgid "Insert a waypoint before the selected waypoint."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:183
+#: Editor/Courseplay_EditorMain.cpp:647
+msgid "Delete Waypoint"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:183
+msgid "Delete selected waypoint."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:184
+#: Editor/Courseplay_EditorMain.cpp:651
+msgid "Fill Out"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:184
+msgid ""
+"Insert waypoints between the selected waypoint to the previus waypoint with "
+"a given distance."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:187
+msgid "Undo"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:188
+msgid "Redo"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:196
+msgid "Course 1"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:197
+msgid "Course 2"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:198
+msgid "Course 3"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:199
+msgid "Course 4"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:200
+msgid "Course 5"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:201
+msgid "Course 6"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:202
+msgid "Course 7"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:203
+msgid "Course 8"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:204
+msgid "Course 9"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:205
+msgid "Course 10"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:208
+msgid "(Un)Select All"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:209
+#: Editor/Courseplay_EditorMain.cpp:210
+msgid "Select or unselect all courses to show the courses on the map or not."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:213
+msgid "Up"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:215
+#: Editor/Courseplay_EditorMain.cpp:216
+msgid "Move course up in the list."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:218
+msgid "Dn"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:223
+msgid "Course Name:"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:228
+msgid "Rename a course by changin it here after selecting it on the list."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:234
+msgid "Course List"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:239
+msgid "Pos X"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:244
+msgid "Pos Y"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:249
+msgid "Angle"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:254
+msgid "Speed"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:261
+msgid "Reverse"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:263
+msgid ""
+"A reverse waypoint, meaning the the vehiche should reverse at this waypoint."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:265
+msgid "Waiting Point"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:267
+msgid ""
+"Set the waypoint as an waiting point.\n"
+"This can be used to set a field start or end point and more."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:269
+msgid "Crossing"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:271
+msgid ""
+"Crossing is used when combining 2 or more courses.\n"
+"a course needs to have this set at the starting waypoint and ending waypoint."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:277
+msgid "Waypoint Info & Property"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:280
+msgid "No savegame loaded"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:281
+msgid "01: Hagstad"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:282
+msgid "02: Two Rivers"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:283
+#: Editor/Courseplay_EditorMain.cpp:285
+msgid "Item label"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:283
+msgid "Game Select"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:286
+msgid "Reload"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:286
+msgid "Reload Savegame"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:287
+msgid "Save"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:287
+msgid "Save Savegame"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:293
+msgid "E&xit\tAlt-F4"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:293
+msgid "Close Courseplay Editor"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:296
+msgid "&File"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:298
+msgid "Undo\tCtrl-z"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:298
+msgid "Undo last action"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:301
+msgid "Redo\tCtrl-Shift-z"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:301
+msgid "Redo last action"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:305 Editor/SettingsFrame.cpp:65
+msgid "Settings"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:308
+msgid "&Edit"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:310
+msgid "Manual (Not implemented)"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:310
+msgid "Manual on how Courseplay Editor works"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:314
+msgid "About\tF1"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:314
+msgid "Show info about this application"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:317
+msgid "Help"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:374
+msgid "Welcome to..."
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:526
+msgid "5 meters"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:530
+msgid "10 meters"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:534
+msgid "20 meters"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:568
+msgid "Farming Simulator 2011"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:574
+msgid "Farming Simulator 2013"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:639
+msgid "Add Waypoint"
+msgstr ""
+
+#: Courseplay Editor/Courseplay_EditorMain.cpp:643
+msgid "Insert Waypoint"
+msgstr ""
+
+#: Courseplay Editor/Locale.cpp:34 Editor/Translater.cpp:141
+msgid "Default"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:44
+msgid ""
+"Do you want Courseplay Editor to try to auto detect where Farming Simulator"
+"(s) install and savegame locations are?\n"
+"\n"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:45
+msgid ""
+"If you select (No) you can set the install and savegame locations under Edit-"
+">Settings"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:46
+msgid "First Time Setup"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:67
+msgid "Found all Farming Simulator 2011 Locations\n"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:70
+msgid ""
+"Found Farming Simulator 2011 install location, but did not find the savegame "
+"location\n"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:75
+msgid ""
+"Found Farming Simulator 2011 savegame location but did not find the install "
+"location\n"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:81
+msgid "Found all Farming Simulator 2013 Locations\n"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:84
+msgid ""
+"Found Farming Simulator 2013 install location, but did not find the savegame "
+"location\n"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:89
+msgid ""
+"Found Farming Simulator 2013 savegame location but did not find the install "
+"location\n"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:94 Editor/Settings.cpp:100
+msgid ""
+"\n"
+"You can manually select the install and savegame location under Edit-"
+">Settings menu if you have one of the game installed."
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:99
+msgid "Courseplay Editor did not find any Farming Simulator games.\n"
+msgstr ""
+
+#: Courseplay Editor/Settings.cpp:102
+msgid "Courseplay Editor Auto Detect Result"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:71
+msgid "On Program Start"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:72
+msgid "Load Last Savegame"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:74
+msgid "Load the last savegame that was edited."
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:77
+msgid "Language Select"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:79 Editor/SettingsFrame.cpp:82
+msgid "English"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:80
+msgid "Danish"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:81
+msgid "Current Language"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:83
+msgid "Set Language"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:87
+msgid "Resetting User Interface"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:88
+msgid "Reset User Interface"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:94
+msgid ""
+"When pressing the \"Reset User Interface\" button, the userinterface will "
+"reset to it's defaut positions."
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:99 Editor/SettingsFrame.cpp:115
+#: Editor/SettingsFrame.cpp:335
+msgid "Savegame Location"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:100 Editor/SettingsFrame.cpp:118
+#: Editor/SettingsFrame.cpp:324
+msgid "Install Location"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:103 Editor/SettingsFrame.cpp:105
+#: Editor/SettingsFrame.cpp:123 Editor/SettingsFrame.cpp:125
+msgid "..."
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:109
+msgid "Enable Farming Simulator 2011"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:111 Editor/SettingsFrame.cpp:127
+msgid "Auto Detect Locations"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:116
+msgid "Enable Farming Simulator 2013"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:129
+msgid "General"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:130 Editor/Translater.cpp:180
+msgid "Language"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:131
+msgid "User Interface"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:132
+msgid "Shortcuts"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:133
+msgid "FS2011"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:134
+msgid "FS2013"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:139
+msgid "Close"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:331
+msgid "and"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:339
+msgid "location"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:341
+msgid "locations"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:343
+#, c-format
+msgid ""
+"Was not able to auto detect %s.\n"
+"\n"
+"You can manually set the %s, if you have the game installed."
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:347
+msgid "Auto Detect Failed!"
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:368
+msgid "Select Farming Simulator 2011 Install Location."
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:377
+msgid "Select Farming Simulator 2011 Savegame Location."
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:420
+msgid "Select Farming Simulator 2013 Install Location."
+msgstr ""
+
+#: Courseplay Editor/SettingsFrame.cpp:429
+msgid "Select Farming Simulator 2013 Savegame Location."
+msgstr ""
+
+#: Courseplay Editor/Translater.cpp:176
+msgid "Array of language names and identifiers should have the same size."
+msgstr ""
+
+#: Courseplay Editor/Translater.cpp:178
+msgid "Array of language fileNames and identifiers should have the same size."
+msgstr ""
+
+#: Courseplay Editor/Translater.cpp:179
+msgid "Select the language"
+msgstr ""

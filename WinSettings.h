@@ -4,11 +4,11 @@
 #include "Variables.h"
 #include <wx/config.h>
 
-class WinSettings : public wxConfig
+class CoreSettings : public wxConfig
 {
     public:
-        WinSettings(const wxString& appName = wxEmptyString);
-        virtual ~WinSettings();
+        CoreSettings();
+        virtual ~CoreSettings();
 
         // Game Handling and path findings
         wxString doFindInstallPath(FarmingSimulatorGames gameId);

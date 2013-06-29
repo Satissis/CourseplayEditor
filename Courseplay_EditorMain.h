@@ -25,6 +25,7 @@
 #include <wx/panel.h>
 #include <wx/button.h>
 #include <wx/frame.h>
+#include <wx/combobox.h>
 #include <wx/statusbr.h>
 //*)
 
@@ -43,6 +44,8 @@ class Courseplay_EditorFrame: public wxFrame
         Courseplay_EditorFrame(wxWindow* parent,wxWindowID id = -1);
         virtual ~Courseplay_EditorFrame();
 
+        void updateToolbar2(void);
+
 
     public: // Event Functions
         void OnBtnFillOutDropdown   (wxAuiToolBarEvent& event);
@@ -56,10 +59,7 @@ class Courseplay_EditorFrame: public wxFrame
 
     public: // Variables
 
-
     private: // Functions
-        void ifFirstTimeSetup(void);
-
 
     private: // Variables
         Settings *settings;
@@ -103,8 +103,6 @@ class Courseplay_EditorFrame: public wxFrame
         void OnWpPropWaitPointClick(wxCommandEvent& event);
         void OnWpPropCrossingClick(wxCommandEvent& event);
         void OnMainWindowRightDown(wxMouseEvent& event);
-        void OnLoadCoursesSelected(wxCommandEvent& event);
-        void OnSaveCoursesSelected(wxCommandEvent& event);
         void OnUndoSelected(wxCommandEvent& event);
         void OnRedoSelected(wxCommandEvent& event);
         void OnSettingsSelected(wxCommandEvent& event);
@@ -116,7 +114,6 @@ class Courseplay_EditorFrame: public wxFrame
         static const long ID_TLB1_BTN_INSERT;
         static const long ID_TLB1_BTN_DELETE;
         static const long ID_TLB1_BTN_FILL;
-        static const long ID_TLB1_BTN_GAME_SELECT;
         static const long ID_TOOL_UNDO;
         static const long ID_TOOL_REDO;
         static const long TLB_1;
@@ -140,8 +137,11 @@ class Courseplay_EditorFrame: public wxFrame
         static const long ID_CHECKBOX2;
         static const long ID_CHECKBOX3;
         static const long ID_PANEL2;
-        static const long ID_File_Load;
-        static const long ID_File_Save;
+        static const long ID_TLB2_BTN_GAME_SELECT;
+        static const long ID_TLB2_COMBOX_SAVEGAMESELECT;
+        static const long ID_TLB2_BTN_RELOAD;
+        static const long ID_TLB2_BTN_SAVESAVEGAME;
+        static const long TLB_2;
         static const long idMenuQuit;
         static const long ID_EDIT_Undo;
         static const long ID_EDIT_Redo;
@@ -159,7 +159,6 @@ class Courseplay_EditorFrame: public wxFrame
         wxTextCtrl* wpPropPosX;
         wxStaticText* StaticText2;
         wxTextCtrl* wpPropAngle;
-        wxMenuItem* LoadCourses;
         wxMenu* Menu3;
         wxPanel* panelCourseList;
         wxTextCtrl* courseName;
@@ -176,11 +175,12 @@ class Courseplay_EditorFrame: public wxFrame
         wxTextCtrl* wpPropSpeed;
         wxAuiToolBar* AuiTools1;
         wxMenuItem* CPE_Settings;
+        wxComboBox* SavegameSelect;
         wxTextCtrl* wpPropPosY;
-        wxMenuItem* SaveCourses;
         wxStaticText* StaticText4;
         wxMenuItem* Undo;
         wxCheckBox* wpPropCrossing;
+        wxAuiToolBar* AuiTools2;
         wxCheckBox* wpPropReverse;
         //*)
 

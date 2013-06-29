@@ -8,6 +8,8 @@
 //*)
 
 //(*IdInit(SettingsFrame)
+const long SettingsFrame::ID_STATICBOX8 = wxNewId();
+const long SettingsFrame::ID_CHECKBOX1 = wxNewId();
 const long SettingsFrame::ID_TAP_GENERAL = wxNewId();
 const long SettingsFrame::ID_STATICBOX2 = wxNewId();
 const long SettingsFrame::ID_LANGLIST = wxNewId();
@@ -51,8 +53,11 @@ END_EVENT_TABLE()
 SettingsFrame::SettingsFrame(Settings *conf, wxAuiManager *m_mgr, wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
 {
     // Setup variables
-    config = conf;
+    setup = conf;
     AuiMan = m_mgr;
+    langList.fileNames.Clear();
+    langList.identifiers.Clear();
+    langList.names.Clear();
 
 
 
@@ -66,12 +71,14 @@ SettingsFrame::SettingsFrame(Settings *conf, wxAuiManager *m_mgr, wxWindow* pare
 	SettingsTaps->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENUBAR));
 	GeneralSettings = new wxPanel(SettingsTaps, ID_TAP_GENERAL, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_TAP_GENERAL"));
 	GeneralSettings->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENUBAR));
+	StaticBox8 = new wxStaticBox(GeneralSettings, ID_STATICBOX8, _("On Program Start"), wxPoint(8,8), wxSize(336,48), 0, _T("ID_STATICBOX8"));
+	CheckBox1 = new wxCheckBox(GeneralSettings, ID_CHECKBOX1, _("Load Last Savegame"), wxPoint(16,32), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
+	CheckBox1->SetValue(false);
+	CheckBox1->SetToolTip(_("Load the last savegame that was edited."));
 	LangSettings = new wxPanel(SettingsTaps, ID_TAP_LANG, wxDefaultPosition, wxSize(352,212), wxTAB_TRAVERSAL, _T("ID_TAP_LANG"));
 	LangSettings->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENUBAR));
 	StaticBox2 = new wxStaticBox(LangSettings, ID_STATICBOX2, _("Language Select"), wxPoint(8,8), wxSize(336,200), 0, _T("ID_STATICBOX2"));
-	LangList = new wxListBox(LangSettings, ID_LANGLIST, wxPoint(16,28), wxSize(152,172), 0, 0, 0, wxDefaultValidator, _T("ID_LANGLIST"));
-	LangList->Append(_("English"));
-	LangList->Append(_("Danish"));
+	LanguageList = new wxListBox(LangSettings, ID_LANGLIST, wxPoint(16,28), wxSize(152,172), 0, 0, 0, wxDefaultValidator, _T("ID_LANGLIST"));
 	StaticBox3 = new wxStaticBox(LangSettings, ID_STATICBOX3, _("Current Language"), wxPoint(176,24), wxSize(160,40), 0, _T("ID_STATICBOX3"));
 	currentLangLabel = new wxStaticText(LangSettings, ID_STATICTEXT2, _("English"), wxPoint(184,40), wxSize(144,16), wxST_NO_AUTORESIZE|wxALIGN_CENTRE|wxTRANSPARENT_WINDOW, _T("ID_STATICTEXT2"));
 	BtnSetLang = new wxButton(LangSettings, ID_BTN_SETLANG, _("Set Language"), wxPoint(176,72), wxSize(160,23), 0, wxDefaultValidator, _T("ID_BTN_SETLANG"));
@@ -81,7 +88,7 @@ SettingsFrame::SettingsFrame(Settings *conf, wxAuiManager *m_mgr, wxWindow* pare
 	StaticBox1 = new wxStaticBox(UISettings, ID_STATICBOX1, _("Resetting User Interface"), wxPoint(8,8), wxSize(336,96), 0, _T("ID_STATICBOX1"));
 	BtnResetUI = new wxButton(UISettings, ID_BTN_RESETUI, _("Reset User Interface"), wxPoint(216,72), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BTN_RESETUI"));
 	BtnResetUI->Disable();
-	if (config->defaultLayout != AuiMan->SavePerspective())
+	if (setup->defaultLayout != AuiMan->SavePerspective())
 	{
 	   BtnResetUI->Enable();
 	}
@@ -177,7 +184,7 @@ void SettingsFrame::OnBtnCloseClick(wxCommandEvent& event)
 
 void SettingsFrame::OnBtnResetUIClick(wxCommandEvent& event)
 {
-    if (AuiMan->LoadPerspective(config->defaultLayout))
+    if (AuiMan->LoadPerspective(setup->defaultLayout))
         BtnResetUI->Disable();
 }
 
@@ -186,7 +193,23 @@ void SettingsFrame::OnSettingsTapsPageChanged(wxNotebookEvent& event)
     updateTapPanels();
 }
 
-void SettingsFrame::updateTapPanels(void)
+bool SettingsFrame::updateLanguageList()
+{
+    LangList temp;
+    setup->getInstalledLanguages(temp);
+
+    if (temp.identifiers.Count() != langList.identifiers.Count())
+    {
+        setup->getInstalledLanguages(langList);
+        LanguageList->Clear();
+        LanguageList->Append(langList.names);
+        BtnSetLang->Disable();
+        return true;
+    }
+    return false;
+}
+
+void SettingsFrame::updateTapPanels()
 {
     switch (SettingsTaps->GetSelection())
     {
@@ -196,11 +219,16 @@ void SettingsFrame::updateTapPanels(void)
         }
         case 1: // Language Tap
         {
+            if (updateLanguageList()) // Only update the label if the language list have changed.
+            {
+                const wxLanguageInfo *langInfo = wxLocale::GetLanguageInfo(setup->selectedLangId);
+                currentLangLabel->SetLabel(langInfo->Description);
+            }
             break;
         }
         case 2: // User Interface Tap
         {
-            if (config->defaultLayout != AuiMan->SavePerspective())
+            if (setup->defaultLayout != AuiMan->SavePerspective())
                 BtnResetUI->Enable();
             else
                 BtnResetUI->Disable();
@@ -212,7 +240,7 @@ void SettingsFrame::updateTapPanels(void)
         }
         case 4: // FS2011 Tap
         {
-            if (config->gameIsEnabled[FS2011])
+            if (setup->gameIsEnabled[FS2011])
             {
                 ChkBoxFS11Enabled->SetValue(true);
                 FS11InstallPath->Enable();
@@ -229,9 +257,9 @@ void SettingsFrame::updateTapPanels(void)
                 BtnFS11SavePath->Disable();
             }
 
-            FS11InstallPath->ChangeValue(config->installPath[FS2011]);
+            FS11InstallPath->ChangeValue(setup->installPath[FS2011]);
 
-            FS11SavePath->ChangeValue(config->savegamePath[FS2011]);
+            FS11SavePath->ChangeValue(setup->savegamePath[FS2011]);
 
             updateBtnFS11AutoDetect();
 
@@ -239,7 +267,7 @@ void SettingsFrame::updateTapPanels(void)
         }
         case 5: // FS2013 Tap
         {
-            if (config->gameIsEnabled[FS2013])
+            if (setup->gameIsEnabled[FS2013])
             {
                 ChkBoxFS13Enabled->SetValue(true);
                 FS13InstallPath->Enable();
@@ -256,9 +284,9 @@ void SettingsFrame::updateTapPanels(void)
                 BtnFS13SavePath->Disable();
             }
 
-            FS13InstallPath->ChangeValue(config->installPath[FS2013]);
+            FS13InstallPath->ChangeValue(setup->installPath[FS2013]);
 
-            FS13SavePath->ChangeValue(config->savegamePath[FS2013]);
+            FS13SavePath->ChangeValue(setup->savegamePath[FS2013]);
 
             updateBtnFS13AutoDetect();
 
@@ -280,14 +308,19 @@ void SettingsFrame::OnLangListSelect(wxCommandEvent& event)
 void SettingsFrame::OnBtnSetLangClick(wxCommandEvent& event)
 {
     // TODO: Implement language selection.
-    currentLangLabel->SetLabel(LangList->GetStringSelection());
-    LangList->Deselect(LangList->GetSelection());
+
+    wxMessageBox(_("You need to restart Courseplay Editor for this to take effect.\nRemember to save your savegame before restarting!"),
+                 _("Language Setup Info"),
+                 wxOK | wxCENTER, this);
+    currentLangLabel->SetLabel(LanguageList->GetStringSelection());
+    setup->setSelectedLangId((wxLanguage) langList.identifiers[LanguageList->GetSelection()]);
+    LanguageList->Deselect(LanguageList->GetSelection());
     BtnSetLang->Disable();
 }
 
-void SettingsFrame::updateBtnFS11AutoDetect(void)
+void SettingsFrame::updateBtnFS11AutoDetect()
 {
-    if (config->gameIsEnabled[FS2011] && (FS11InstallPath->GetValue() == wxEmptyString || FS11SavePath->GetValue() == wxEmptyString))
+    if (setup->gameIsEnabled[FS2011] && (FS11InstallPath->GetValue() == wxEmptyString || FS11SavePath->GetValue() == wxEmptyString))
         BtnFS11AutoDetect->Enable();
     else
         BtnFS11AutoDetect->Disable();
@@ -295,15 +328,15 @@ void SettingsFrame::updateBtnFS11AutoDetect(void)
 
 void SettingsFrame::OnChkBoxFS11EnabledClick(wxCommandEvent& event)
 {
-    config->enableGame(FS2011, event.IsChecked());
+    setup->enableGame(FS2011, event.IsChecked());
 
     updateTapPanels();
 }
 
 void SettingsFrame::autoDetectPath(FarmingSimulatorGames gameId)
 {
-    bool foundInstallPath  = config->findInstallPath (gameId);
-    bool foundSavegamePath = config->findSavegamePath(gameId);
+    bool foundInstallPath  = setup->findInstallPath (gameId);
+    bool foundSavegamePath = setup->findSavegamePath(gameId);
 
     if (foundInstallPath && foundSavegamePath)
     {
@@ -344,14 +377,14 @@ void SettingsFrame::autoDetectPath(FarmingSimulatorGames gameId)
 
 void SettingsFrame::OnFS11InstallPathTextChange(wxCommandEvent& event)
 {
-    config->setInstallPath(FS2011, FS11InstallPath->GetValue());
+    setup->setInstallPath(FS2011, FS11InstallPath->GetValue());
 
     updateBtnFS11AutoDetect();
 }
 
 void SettingsFrame::OnFS11SavePathTextChange(wxCommandEvent& event)
 {
-    config->setSavegamePath(FS2011, FS11SavePath->GetValue());
+    setup->setSavegamePath(FS2011, FS11SavePath->GetValue());
 
     updateBtnFS11AutoDetect();
 }
@@ -379,9 +412,9 @@ void SettingsFrame::OnBtnFS11AutoDetectClick(wxCommandEvent& event)
     autoDetectPath(FS2011);
 }
 
-void SettingsFrame::updateBtnFS13AutoDetect(void)
+void SettingsFrame::updateBtnFS13AutoDetect()
 {
-    if (config->gameIsEnabled[FS2013] && (FS13InstallPath->GetValue() == wxEmptyString || FS13SavePath->GetValue() == wxEmptyString))
+    if (setup->gameIsEnabled[FS2013] && (FS13InstallPath->GetValue() == wxEmptyString || FS13SavePath->GetValue() == wxEmptyString))
         BtnFS13AutoDetect->Enable();
     else
         BtnFS13AutoDetect->Disable();
@@ -389,21 +422,21 @@ void SettingsFrame::updateBtnFS13AutoDetect(void)
 
 void SettingsFrame::OnChkBoxFS13EnabledClick(wxCommandEvent& event)
 {
-    config->enableGame(FS2013, event.IsChecked());
+    setup->enableGame(FS2013, event.IsChecked());
 
     updateTapPanels();
 }
 
 void SettingsFrame::OnFS13InstallPathTextChange(wxCommandEvent& event)
 {
-    config->setInstallPath(FS2013, FS13InstallPath->GetValue());
+    setup->setInstallPath(FS2013, FS13InstallPath->GetValue());
 
     updateBtnFS13AutoDetect();
 }
 
 void SettingsFrame::OnFS13SavePathTextChange(wxCommandEvent& event)
 {
-    config->setSavegamePath(FS2013, FS13SavePath->GetValue());
+    setup->setSavegamePath(FS2013, FS13SavePath->GetValue());
 
     updateBtnFS13AutoDetect();
 }

@@ -6,38 +6,18 @@
 
 
 btn_Add            RCDATA         ".\\images\\Add.png"
-
-
 btn_Delete         RCDATA         ".\\images\\Delete.png"
-
-
 btn_FillOut        RCDATA         ".\\images\\Fill Out.png"
-
-
 btn_Insert         RCDATA         ".\\images\\Insert.png"
-
-
+btn_Reload         RCDATA         ".\\images\\Reload.png"
+btn_Save           RCDATA         ".\\images\\Save.png"
 FS2011             RCDATA         ".\\images\\FS2011.png"
-
-
 FS2013             RCDATA         ".\\images\\FS2013.png"
-
-
 icon_Width         RCDATA         ".\\images\\Width.png"
-
-
 btn_Undo           RCDATA         ".\\images\\Undo.png"
-
-
 btn_Redo           RCDATA         ".\\images\\Redo.png"
-
-
 btn_Exit           RCDATA         ".\\images\\Exit.png"
-
-
 btn_Settings       RCDATA         ".\\images\\Settings.png"
-
-
 btn_Help           RCDATA         ".\\images\\Help.png"
 
 
@@ -50,4 +30,4 @@ AppIcon            ICON           ".\\images\\AppIcon.ico"
 
 
 // wx.rc file must be set after other resources, in case we need to use another icon for the program.
-#include "wx/msw/wx.rc" 
+#include "wx/msw/wx.rc"

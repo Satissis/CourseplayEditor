@@ -1,6 +1,7 @@
 #ifndef SETTINGS_H_INCLUDED
 #define SETTINGS_H_INCLUDED
 
+#include <wx/app.h>
 #include <wx/wx.h>
 #include <wx/aui/aui.h>
 
@@ -11,25 +12,32 @@
 #endif
 
 #include "SettingsFrame.h"
+#include "Locale.h"
 
-class Settings : public WinSettings
+class Courseplay_EditorFrame;
+
+class Settings : public CoreSettings, public Locale
 {
-public:
-    Settings(wxFrame *frame, wxAuiManager *m_mgr, const wxString& appName = wxEmptyString);
+public: // Functions
+    Settings();
+    Settings(Courseplay_EditorFrame *frame, wxAuiManager *m_mgr);
     virtual ~Settings();
 
-    void showSettings(void);
+    bool isFirstTimeSetup();
+    void doFirstTimeSetup();
+
+    void showSettings();
     void saveDefaultLayout(wxString layout);
 
     // Game Handling and path findings
     bool findInstallPath(FarmingSimulatorGames gameId);
     bool findSavegamePath(FarmingSimulatorGames gameId);
-    void enableGame(FarmingSimulatorGames gameId, bool enable = true);
-    void enableGameIfFound(FarmingSimulatorGames gameId);
+    void enableGame(FarmingSimulatorGames gameId, bool enable = true, bool updateToolbar = true);
+    void enableGameIfFound(FarmingSimulatorGames gameId, bool updateToolbar = true);
     void setInstallPath(FarmingSimulatorGames gameId, wxString path = wxEmptyString);
     void setSavegamePath(FarmingSimulatorGames gameId, wxString path = wxEmptyString);
 
-    void updateGameSelect(void);
+    bool setGameId(FarmingSimulatorGames gameId);
 
 public: // Variables
     bool        gameIsEnabled[NumOfFSGames];
@@ -40,11 +48,12 @@ public: // Variables
     wxString    installPath[NumOfFSGames];
     wxString    savegamePath[NumOfFSGames];
 
-protected:
-    wxFrame         *parent;
-    wxFrame         *configFrame;
+protected: // Variables
+    Courseplay_EditorFrame  *parent;
+    wxFrame                 *configFrame;
 
-private:
+private: // Functions
+    void updateGameSelect();
 
 };
 
