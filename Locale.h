@@ -2,14 +2,15 @@
 #define LOCALE_H_INCLUDED
 
 #include <wx/wx.h>
-#include <wx/config.h>
 #include <wx/intl.h>
 #include "Variables.h"
 
+class Settings;
+
 class Locale
 {
-public:
-    Locale(wxConfig *config);
+public: // Functions
+    Locale(Settings *config);
     ~Locale();
 
     void getInstalledLanguages(LangList &langList, bool addDefault = false);
@@ -21,11 +22,14 @@ public:
 	void setLocaleSearchPath(wxString value);
 	void setLocaleConfigPath(wxString value);
 
-	long selectedLangId;
 	virtual void setSelectedLangId(wxLanguage lang);
 
-private:
-    wxConfig *m_Config;
+public: // Variables
+    long selectedLangId;
+    wxString shortLangName;
+
+private: // Variables
+    Settings *m_Config;
 	wxString  m_SearchPath;
 	wxString  m_ConfigPath;
 	wxLocale *m_Locale;

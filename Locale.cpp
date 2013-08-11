@@ -1,10 +1,12 @@
 #include "Locale.h"
 #include "Courseplay_EditorApp.h"
+#include "Settings.h"
+
 #include <wx/dir.h>
 #include <wx/filename.h>
 
 
-Locale::Locale(wxConfig *config)
+Locale::Locale(Settings *config)
 {
     m_Config        = config;
 	m_SearchPath    = wxPathOnly(wxGetApp().argv[0]);
@@ -12,6 +14,7 @@ Locale::Locale(wxConfig *config)
 	m_Locale        = NULL;
 
 	selectedLangId  = wxLANGUAGE_UNKNOWN;
+	shortLangName   = wxT("en");
 }
 
 Locale::~Locale()
@@ -125,6 +128,8 @@ bool Locale::loadLocale()
 			m_Locale->AddCatalogLookupPathPrefix(m_SearchPath);
 			m_Locale->AddCatalog(langList.fileNames[i]);
 
+			shortLangName = langList.fileNames[i];
+
 			selectedLangId = langList.identifiers[i];
 
 			return true;
@@ -151,6 +156,8 @@ bool Locale::loadDefaultLocaleIfExists()
                 m_Locale->Init(langList.identifiers[i]);
                 m_Locale->AddCatalogLookupPathPrefix(m_SearchPath);
                 m_Locale->AddCatalog(langList.fileNames[i]);
+
+                shortLangName = langList.fileNames[i];
 
                 selectedLangId = langList.identifiers[i];
 

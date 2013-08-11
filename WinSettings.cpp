@@ -35,7 +35,7 @@ CoreSettings::~CoreSettings()
 {
 }
 
-wxString CoreSettings::doFindInstallPath(FarmingSimulatorGames gameId)
+wxString CoreSettings::doFindInstallPath(FSGames gameId)
 {
     // Create main search reg keys
     wxRegKey *MainRegKey = new wxRegKey(_T("HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall"));
@@ -96,7 +96,7 @@ wxString CoreSettings::doFindInstallPath(FarmingSimulatorGames gameId)
     return wxEmptyString;
 }
 
-wxString CoreSettings::doFindSavegamePath(FarmingSimulatorGames gameId)
+wxString CoreSettings::doFindSavegamePath(FSGames gameId)
 {
     // Create Document search reg key
     wxRegKey Documents(_T("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders"));

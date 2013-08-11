@@ -9,7 +9,9 @@
 
 //(*IdInit(SettingsFrame)
 const long SettingsFrame::ID_STATICBOX8 = wxNewId();
-const long SettingsFrame::ID_CHECKBOX1 = wxNewId();
+const long SettingsFrame::ID_CHK_LOAD_LAST_SAVEGAME = wxNewId();
+const long SettingsFrame::ID_STATICBOX9 = wxNewId();
+const long SettingsFrame::ID_CHK_BACKUP_SAVEGAME = wxNewId();
 const long SettingsFrame::ID_TAP_GENERAL = wxNewId();
 const long SettingsFrame::ID_STATICBOX2 = wxNewId();
 const long SettingsFrame::ID_LANGLIST = wxNewId();
@@ -65,16 +67,19 @@ SettingsFrame::SettingsFrame(Settings *conf, wxAuiManager *m_mgr, wxWindow* pare
 	wxBoxSizer* BoxSizer2;
 	wxBoxSizer* BoxSizer1;
 
-	Create(parent, wxID_ANY, _("Settings"), wxDefaultPosition, wxDefaultSize, wxCAPTION, _T("wxID_ANY"));
+	Create(parent, wxID_ANY, _("Settings"), wxDefaultPosition, wxDefaultSize, wxSTAY_ON_TOP|wxCAPTION, _T("wxID_ANY"));
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
 	SettingsTaps = new wxNotebook(this, ID_SETTINGSTAPS, wxDefaultPosition, wxSize(360,240), 0, _T("ID_SETTINGSTAPS"));
 	SettingsTaps->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENUBAR));
 	GeneralSettings = new wxPanel(SettingsTaps, ID_TAP_GENERAL, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL, _T("ID_TAP_GENERAL"));
 	GeneralSettings->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENUBAR));
 	StaticBox8 = new wxStaticBox(GeneralSettings, ID_STATICBOX8, _("On Program Start"), wxPoint(8,8), wxSize(336,48), 0, _T("ID_STATICBOX8"));
-	CheckBox1 = new wxCheckBox(GeneralSettings, ID_CHECKBOX1, _("Load Last Savegame"), wxPoint(16,32), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX1"));
-	CheckBox1->SetValue(false);
-	CheckBox1->SetToolTip(_("Load the last savegame that was edited."));
+	ChkLoadLastSavegame = new wxCheckBox(GeneralSettings, ID_CHK_LOAD_LAST_SAVEGAME, _("Load Last Savegame"), wxPoint(16,32), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHK_LOAD_LAST_SAVEGAME"));
+	ChkLoadLastSavegame->SetValue(false);
+	ChkLoadLastSavegame->SetToolTip(_("Load the last savegame that was edited."));
+	StaticBox9 = new wxStaticBox(GeneralSettings, ID_STATICBOX9, _("Backup"), wxPoint(8,64), wxSize(336,48), 0, _T("ID_STATICBOX9"));
+	chkBackupSavegame = new wxCheckBox(GeneralSettings, ID_CHK_BACKUP_SAVEGAME, _("Backup Savegame When Saving"), wxPoint(16,88), wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHK_BACKUP_SAVEGAME"));
+	chkBackupSavegame->SetValue(true);
 	LangSettings = new wxPanel(SettingsTaps, ID_TAP_LANG, wxDefaultPosition, wxSize(352,212), wxTAB_TRAVERSAL, _T("ID_TAP_LANG"));
 	LangSettings->SetBackgroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_MENUBAR));
 	StaticBox2 = new wxStaticBox(LangSettings, ID_STATICBOX2, _("Language Select"), wxPoint(8,8), wxSize(336,200), 0, _T("ID_STATICBOX2"));
@@ -149,6 +154,8 @@ SettingsFrame::SettingsFrame(Settings *conf, wxAuiManager *m_mgr, wxWindow* pare
 	BoxSizer1->SetSizeHints(this);
 	Center();
 
+	Connect(ID_CHK_LOAD_LAST_SAVEGAME,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&SettingsFrame::OnChkLoadLastSavegameClick);
+	Connect(ID_CHK_BACKUP_SAVEGAME,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&SettingsFrame::OnChkBackupSavegameClick);
 	Connect(ID_LANGLIST,wxEVT_COMMAND_LISTBOX_SELECTED,(wxObjectEventFunction)&SettingsFrame::OnLangListSelect);
 	Connect(ID_BTN_SETLANG,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&SettingsFrame::OnBtnSetLangClick);
 	Connect(ID_BTN_RESETUI,wxEVT_COMMAND_BUTTON_CLICKED,(wxObjectEventFunction)&SettingsFrame::OnBtnResetUIClick);
@@ -198,6 +205,7 @@ bool SettingsFrame::updateLanguageList()
     LangList temp;
     setup->getInstalledLanguages(temp);
 
+    // To prevent it don't reload the language list each time the page is shown unless it have changed
     if (temp.identifiers.Count() != langList.identifiers.Count())
     {
         setup->getInstalledLanguages(langList);
@@ -215,6 +223,7 @@ void SettingsFrame::updateTapPanels()
     {
         case 0: // General Tap
         {
+            ChkLoadLastSavegame->SetValue(setup->loadLastSavegame);
             break;
         }
         case 1: // Language Tap
@@ -328,12 +337,38 @@ void SettingsFrame::updateBtnFS11AutoDetect()
 
 void SettingsFrame::OnChkBoxFS11EnabledClick(wxCommandEvent& event)
 {
-    setup->enableGame(FS2011, event.IsChecked());
+    int returnVal;
+    if (setup->selectedGameId == FS2011 && setup->savegameHasChanges && !event.IsChecked())
+    {
+        ChkBoxFS11Enabled->SetValue(true);
+        wxString msg = _("You have unsaved changes in your current savegame!\nYou will lose those changes if you disable %s.\n\nAre you sure you will disable %s?");
+        returnVal = wxMessageBox(wxString::Format(msg, _("Farming Simulator 2011"), _("Farming Simulator 2011")),
+                                 _("Unsaved Changes"),
+                                 wxYES_NO|wxCENTER|wxICON_EXCLAMATION,
+                                 this);
+    }
+    else
+        returnVal = wxYES;
 
-    updateTapPanels();
+    if (returnVal == wxYES)
+    {
+        short oldId = (short)setup->selectedGameId;
+        setup->enableGame(FS2011, event.IsChecked());
+        ChkBoxFS11Enabled->SetValue(event.IsChecked());
+
+        if (oldId != (short)setup->selectedGameId)
+            setup->updateSavegameList();
+
+        updateTapPanels();
+    }
+    else
+    {
+        ChkBoxFS11Enabled->SetValue(true);
+    }
+
 }
 
-void SettingsFrame::autoDetectPath(FarmingSimulatorGames gameId)
+void SettingsFrame::autoDetectPath(FSGames gameId)
 {
     bool foundInstallPath  = setup->findInstallPath (gameId);
     bool foundSavegamePath = setup->findSavegamePath(gameId);
@@ -341,10 +376,12 @@ void SettingsFrame::autoDetectPath(FarmingSimulatorGames gameId)
     if (foundInstallPath && foundSavegamePath)
     {
         updateTapPanels();
+        setup->updateSavegameList();
     }
     else
     {
         updateTapPanels();
+        setup->updateSavegameList();
 
         wxString tempText = wxEmptyString;
         if (!foundInstallPath)
@@ -378,6 +415,7 @@ void SettingsFrame::autoDetectPath(FarmingSimulatorGames gameId)
 void SettingsFrame::OnFS11InstallPathTextChange(wxCommandEvent& event)
 {
     setup->setInstallPath(FS2011, FS11InstallPath->GetValue());
+    setup->updateSavegameList();
 
     updateBtnFS11AutoDetect();
 }
@@ -385,6 +423,7 @@ void SettingsFrame::OnFS11InstallPathTextChange(wxCommandEvent& event)
 void SettingsFrame::OnFS11SavePathTextChange(wxCommandEvent& event)
 {
     setup->setSavegamePath(FS2011, FS11SavePath->GetValue());
+    setup->updateSavegameList();
 
     updateBtnFS11AutoDetect();
 }
@@ -422,14 +461,40 @@ void SettingsFrame::updateBtnFS13AutoDetect()
 
 void SettingsFrame::OnChkBoxFS13EnabledClick(wxCommandEvent& event)
 {
-    setup->enableGame(FS2013, event.IsChecked());
+    int returnVal;
+    if (setup->selectedGameId == FS2013 && setup->savegameHasChanges && !event.IsChecked())
+    {
+        ChkBoxFS13Enabled->SetValue(true);
+        wxString msg = _("You have unsaved changes in your current savegame!\nYou will lose those changes if you disable %s.\n\nAre you sure you will disable %s?");
+        returnVal = wxMessageBox(wxString::Format(msg, _("Farming Simulator 2013"), _("Farming Simulator 2013")),
+                                 _("Unsaved Changes"),
+                                 wxYES_NO|wxCENTER|wxICON_EXCLAMATION,
+                                 this);
+    }
+    else
+        returnVal = wxYES;
 
-    updateTapPanels();
+    if (returnVal == wxYES)
+    {
+        short oldId = (short)setup->selectedGameId;
+        setup->enableGame(FS2013, event.IsChecked());
+        ChkBoxFS13Enabled->SetValue(event.IsChecked());
+
+        if (oldId != (short)setup->selectedGameId)
+            setup->updateSavegameList();
+
+        updateTapPanels();
+    }
+    else
+    {
+        ChkBoxFS13Enabled->SetValue(true);
+    }
 }
 
 void SettingsFrame::OnFS13InstallPathTextChange(wxCommandEvent& event)
 {
     setup->setInstallPath(FS2013, FS13InstallPath->GetValue());
+    setup->updateSavegameList();
 
     updateBtnFS13AutoDetect();
 }
@@ -437,6 +502,7 @@ void SettingsFrame::OnFS13InstallPathTextChange(wxCommandEvent& event)
 void SettingsFrame::OnFS13SavePathTextChange(wxCommandEvent& event)
 {
     setup->setSavegamePath(FS2013, FS13SavePath->GetValue());
+    setup->updateSavegameList();
 
     updateBtnFS13AutoDetect();
 }
@@ -462,4 +528,14 @@ void SettingsFrame::OnBtnFS13SavePathClick(wxCommandEvent& event)
 void SettingsFrame::OnBtnFS13AutoDetectClick(wxCommandEvent& event)
 {
     autoDetectPath(FS2013);
+}
+
+void SettingsFrame::OnChkLoadLastSavegameClick(wxCommandEvent& event)
+{
+    setup->setLoadLastSavegame(event.IsChecked());
+}
+
+void SettingsFrame::OnChkBackupSavegameClick(wxCommandEvent& event)
+{
+    setup->setBackupSavegame(event.IsChecked());
 }

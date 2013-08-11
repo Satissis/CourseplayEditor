@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+<modDesc descVersion="9">
+    <author>Woody221</author>
+    <version>1</version>
+    <title>
+        <en>SampleModMap</en>
+        <de>orginalmapveränderterhof</de>
+    </title>
+    <description>
+        <en>This is the sample mod map.</en>
+        <de>Dies ist die Beispiel Mod Map.</de>
+    </description>
+    <iconFilename>map_preview.png</iconFilename>
+    <multiplayer supported="true"/>
+    <l10n>
+        <text name="sampleModMapBriefingText1">
+            <en>Start your career and discover the possibilities of a modern farmer. It is completely up to you to decide how you will manage your farm.</en>
+            <de>Start your career and discover the possibilities of a modern farmer. It is completely up to you to decide how you will manage your farm.</de>
+        </text>
+        <text name="sampleModMapBriefingText2">
+            <en>Do you want to buy new fields in order to expand your farm or do you want to grow your livestock? To do so in this version of Hagenstedt, the cowzone and scheepzone are now moved to your farmyard itself. This allows you to centralize all your activities in one place.</en>
+            <de>Do you want to buy new fields in order to expand your farm or do you want to grow your livestock? To do so in this version of Hagenstedt, the cowzone and scheepzone are now moved to your farmyard itself. This allows you to centralize all your activities in one place.</de>
+        </text>
+        <text name="sampleModMapBriefingText3">
+            <en>With a lot of hard work and good competences, you will soon be one the most important farmers of the country! Please, enjoy your new World! Woody221</en>
+            <de>With a lot of hard work and good competences, you will soon be one the most important farmers of the country! Please, enjoy your new World! Woody221</de>
+        </text>
+    </l10n>
+
+    <maps>
+        <map id="SampleModMap" className="SampleModMap" filename="SampleModMap.lua" defaultVehiclesXMLFilename="defaultVehicles.xml">
+            <title>
+                <en>Hagenstedt V2</en>
+                <de>Hagenstedt V2</de>
+            </title>
+            <description>
+                <en>You've recently acquired a nice farm in Hagenstedt. Now it's up to you prove yourself as a farmer and be a part of the local economy.</en>
+                <de>You've recently acquired a nice farm in Hagenstedt. Now it's up to you prove yourself as a farmer and be a part of the local economy.</de>
+            </description>
+            <briefingImagePrefix>sampleModMap</briefingImagePrefix>
+            <briefingTextPrefix>sampleModMap</briefingTextPrefix>
+            <iconFilename>map_preview.png</iconFilename>
+        </map>
+    </maps>
+
+</modDesc>

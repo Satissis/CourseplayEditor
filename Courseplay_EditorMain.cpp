@@ -276,15 +276,17 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     BoxSizer4->SetSizeHints(panelWpProp);
     m_mgr->AddPane(panelWpProp, wxAuiPaneInfo().Name(_T("wpProperty")).DefaultPane().Caption(_("Waypoint Info & Property")).CloseButton(false).Right().TopDockable(false).BottomDockable(false).Resizable(false));
     AuiTools2 = new wxAuiToolBar(this, TLB_2, wxPoint(222,10), wxDefaultSize, wxAUI_TB_DEFAULT_STYLE);
-    SavegameSelect = new wxComboBox(AuiTools2, ID_TLB2_COMBOX_SAVEGAMESELECT, wxEmptyString, wxPoint(32,20), wxSize(170,21), 0, 0, wxCB_SIMPLE|wxCB_READONLY|wxCB_DROPDOWN, wxDefaultValidator, _T("ID_TLB2_COMBOX_SAVEGAMESELECT"));
+    SavegameSelect = new wxComboBox(AuiTools2, ID_TLB2_COMBOX_SAVEGAMESELECT, wxEmptyString, wxPoint(32,20), wxSize(200,21), 0, 0, wxCB_SIMPLE|wxCB_READONLY|wxCB_DROPDOWN, wxDefaultValidator, _T("ID_TLB2_COMBOX_SAVEGAMESELECT"));
     SavegameSelect->SetSelection( SavegameSelect->Append(_("No savegame loaded")) );
-    SavegameSelect->Append(_("01: Hagstad"));
-    SavegameSelect->Append(_("02: Two Rivers"));
     AuiTools2->AddTool(ID_TLB2_BTN_GAME_SELECT, _("Item label"), TbIcon_Games[FS2013], wxNullBitmap, wxITEM_NORMAL, _("Game Select"), wxEmptyString, NULL);
     AuiTools2->SetToolDropDown(ID_TLB2_BTN_GAME_SELECT, true);
+    AuiTools2->EnableTool(ID_TLB2_BTN_GAME_SELECT, false);
     AuiTools2->AddControl(SavegameSelect, _("Item label"));
+    SavegameSelect->Enable(false);
     AuiTools2->AddTool(ID_TLB2_BTN_RELOAD, _("Reload"), TbIcon_Reload, wxNullBitmap, wxITEM_NORMAL, _("Reload Savegame"), wxEmptyString, NULL);
+    AuiTools2->EnableTool(ID_TLB2_BTN_RELOAD, false);
     AuiTools2->AddTool(ID_TLB2_BTN_SAVESAVEGAME, _("Save"), TbIcon_Save, wxNullBitmap, wxITEM_NORMAL, _("Save Savegame"), wxEmptyString, NULL);
+    AuiTools2->EnableTool(ID_TLB2_BTN_SAVESAVEGAME, false);
     AuiTools2->Realize();
     m_mgr->AddPane(AuiTools2, wxAuiPaneInfo().Name(_T("TLB_2")).ToolbarPane().CloseButton(false).Layer(10).Top().LeftDockable(false).RightDockable(false).Gripper());
     m_mgr->Update();
@@ -336,6 +338,9 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     Connect(ID_CHECKBOX1,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnWpPropReverseClick);
     Connect(ID_CHECKBOX2,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnWpPropWaitPointClick);
     Connect(ID_CHECKBOX3,wxEVT_COMMAND_CHECKBOX_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnWpPropCrossingClick);
+    Connect(ID_TLB2_COMBOX_SAVEGAMESELECT,wxEVT_COMMAND_COMBOBOX_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnSavegameSelected);
+    Connect(ID_TLB2_BTN_RELOAD,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnBtnReloadSavegameClick);
+    Connect(ID_TLB2_BTN_SAVESAVEGAME,wxEVT_COMMAND_TOOL_CLICKED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnBtnSaveSavegameClick);
     Connect(idMenuQuit,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnQuit);
     Connect(ID_EDIT_Undo,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnUndoSelected);
     Connect(ID_EDIT_Redo,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&Courseplay_EditorFrame::OnRedoSelected);
@@ -346,13 +351,16 @@ Courseplay_EditorFrame::Courseplay_EditorFrame(wxWindow* parent,wxWindowID id)
     //*)
 
     // Init settings.
-    settings = new Settings(this, m_mgr);
-    settings->loadLocale();
+    setup = new Settings(this, m_mgr);
+    setup->loadLocale();
 
-    settings->saveDefaultLayout(m_mgr->SavePerspective());
+    // Load Perspective if one is saved or use the default layout.
+    m_mgr->LoadPerspective(setup->getSavedLayout());
 
-    if (settings->Exists(_T("GUI/layout")))
-        m_mgr->LoadPerspective(settings->Read(_T("GUI/layout")));
+    // Init DataHandler
+    data = new DataHandler(setup);
+
+    updateSavegameList();
 
     // Make sure all toolbar2 is up to date
     updateToolbar2();
@@ -362,6 +370,12 @@ Courseplay_EditorFrame::~Courseplay_EditorFrame()
 {
     //(*Destroy(Courseplay_EditorFrame)
     //*)
+
+    if (data)
+        delete data;
+
+    if (setup)
+        delete setup;
 }
 
 void Courseplay_EditorFrame::OnQuit(wxCommandEvent& event)
@@ -379,13 +393,13 @@ void Courseplay_EditorFrame::OnAbout(wxCommandEvent& event)
 
 void Courseplay_EditorFrame::OnClose(wxCloseEvent& event)
 {
-    //delete wxConfigBase::Set((wxConfigBase *) NULL);
-    // TODO: Save all settings before closing.
-    settings->Write(_T("GUI/layout"), m_mgr->SavePerspective());
+    // TODO: Save all setup before closing.
+    setup->saveLayout(m_mgr->SavePerspective());
 
-    delete settings;
     Destroy();
-}void Courseplay_EditorFrame::OnCourseListToggled(wxCommandEvent& event)
+}
+
+void Courseplay_EditorFrame::OnCourseListToggled(wxCommandEvent& event)
 {
     courseListSelectedAll = true;
 
@@ -569,13 +583,13 @@ void Courseplay_EditorFrame::OnBtnGameSelectDropdown(wxAuiToolBarEvent& event)
         wxMenuItem* m1 =  new wxMenuItem(&menuPopup, Game_FarmingSimulator2011, _("Farming Simulator 2011"));
         m1->SetBitmap(TbIcon_Games[FS2011]);
         menuPopup.Append(m1);
-        if (!settings->gameIsEnabled[FS2011])
+        if (!setup->gameIsEnabled[FS2011])
             m1->Enable(false);
 
         wxMenuItem* m2 =  new wxMenuItem(&menuPopup, Game_FarmingSimulator2013, _("Farming Simulator 2013"));
         m2->SetBitmap(TbIcon_Games[FS2013]);
         menuPopup.Append(m2);
-        if (!settings->gameIsEnabled[FS2013])
+        if (!setup->gameIsEnabled[FS2013])
             m2->Enable(false);
 
         // line up our menu with the button
@@ -592,26 +606,90 @@ void Courseplay_EditorFrame::OnBtnGameSelectDropdown(wxAuiToolBarEvent& event)
 
 void Courseplay_EditorFrame::OnGameFS2011Select(wxCommandEvent& event)
 {
-    settings->setGameId(FS2011);
-    updateToolbar2();
+    if (setup->selectedGameId != FS2011) // only update if not the same game
+    {
+        int returnVal;
+        if (setup->savegameHasChanges)
+            returnVal = askToSave();
+        else
+            returnVal = wxNO;
 
-    // TODO: Reset everything for game change to Farming Simulator 2011
+        if (returnVal != wxCANCEL)
+        {
+            if (returnVal == wxYES)
+            {
+                // Save the savegame
+                data->saveSavegame();
+            }
+
+            setup->setSavegameHasChanges(false);
+
+            setup->setSavegameId(0);
+            setup->setGameId(FS2011);
+
+            loadSavegame();
+
+            updateSavegameList();
+
+            updateToolbar2();
+
+            // TODO: Reset everything for game change to Farming Simulator 2011
+        }
+    }
 }
 
 void Courseplay_EditorFrame::OnGameFS2013Select(wxCommandEvent& event)
 {
-    settings->setGameId(FS2013);
-    updateToolbar2();
+    if (setup->selectedGameId != FS2013) // only update if not the same game
+    {
+        int returnVal;
+        if (setup->savegameHasChanges)
+            returnVal = askToSave();
+        else
+            returnVal = wxNO;
 
-    // TODO: Reset everything for game change to Farming Simulator 2013
+        if (returnVal != wxCANCEL)
+        {
+            if (returnVal == wxYES)
+            {
+                // Save the savegame
+                data->saveSavegame();
+            }
+
+            setup->setSavegameHasChanges(false);
+
+            setup->setSavegameId(0);
+            setup->setGameId(FS2013);
+
+            loadSavegame();
+
+            updateSavegameList();
+
+            updateToolbar2();
+
+            // TODO: Reset everything for game change to Farming Simulator 2013
+        }
+    }
 }
 
-void Courseplay_EditorFrame::updateToolbar2(void)
+void Courseplay_EditorFrame::updateSavegameList()
 {
-    if (settings->selectedGameId >= 0)
+    SavegameSelect->Clear();
+
+    data->getSavegames();
+    if (data->savegameList->Count() > 0)
     {
-        if (!TbIcon_Games[settings->selectedGameId].IsNull())
-            AuiTools2->SetToolBitmap(ID_TLB2_BTN_GAME_SELECT, TbIcon_Games[settings->selectedGameId]);
+        SavegameSelect->Append(data->savegameList->name);
+        SavegameSelect->SetSelection(setup->savegameId);
+    }
+}
+
+void Courseplay_EditorFrame::updateToolbar2()
+{
+    if (setup->selectedGameId >= 0)
+    {
+        if (!TbIcon_Games[setup->selectedGameId].IsNull())
+            AuiTools2->SetToolBitmap(ID_TLB2_BTN_GAME_SELECT, TbIcon_Games[setup->selectedGameId]);
         else
         {
             wxSize sizer(TB_ICON_SIZE, TB_ICON_SIZE);
@@ -620,10 +698,27 @@ void Courseplay_EditorFrame::updateToolbar2(void)
         }
 
         AuiTools2->EnableTool(ID_TLB2_BTN_GAME_SELECT, true);
+        SavegameSelect->Enable();
+
+        if (setup->savegameHasChanges)
+        {
+            AuiTools2->EnableTool(ID_TLB2_BTN_RELOAD, true);
+            AuiTools2->EnableTool(ID_TLB2_BTN_SAVESAVEGAME, true);
+        }
+        else
+        {
+            AuiTools2->EnableTool(ID_TLB2_BTN_RELOAD, false);
+            AuiTools2->EnableTool(ID_TLB2_BTN_SAVESAVEGAME, false);
+        }
     }
     else
     {
         AuiTools2->EnableTool(ID_TLB2_BTN_GAME_SELECT, false);
+        SavegameSelect->Disable();
+        AuiTools2->EnableTool(ID_TLB2_BTN_RELOAD, false);
+        AuiTools2->EnableTool(ID_TLB2_BTN_SAVESAVEGAME, false);
+        SavegameSelect->Clear();
+        SavegameSelect->SetSelection( SavegameSelect->Append(_("No savegame loaded")));
     }
 
     // Make sure the toolbar is up to date
@@ -693,7 +788,7 @@ void Courseplay_EditorFrame::OnRedoSelected(wxCommandEvent& event)
 
 void Courseplay_EditorFrame::OnSettingsSelected(wxCommandEvent& event)
 {
-    settings->showSettings();
+    setup->showSettings();
 }
 
 void Courseplay_EditorFrame::OnManualSelected(wxCommandEvent& event)
@@ -701,3 +796,70 @@ void Courseplay_EditorFrame::OnManualSelected(wxCommandEvent& event)
     // TODO: Add manual
 }
 
+void Courseplay_EditorFrame::OnSavegameSelected(wxCommandEvent& event)
+{
+    int id = event.GetSelection();
+    if (id != setup->savegameId)
+    {
+        int returnVal;
+        if (setup->savegameHasChanges)
+            returnVal = askToSave();
+        else
+            returnVal = wxNO;
+
+        if (returnVal != wxCANCEL)
+        {
+            if (returnVal == wxYES)
+            {
+                // Save the savegame
+                if (data->saveSavegame())
+                    setup->setSavegameHasChanges(false);
+            }
+
+            setup->setSavegameId(id);
+
+            loadSavegame();
+        }
+    }
+}
+
+void Courseplay_EditorFrame::loadSavegame()
+{
+    if (data->loadSavegame())
+    {
+        // TODO: load new courseplay routes
+    }
+}
+
+void Courseplay_EditorFrame::OnBtnReloadSavegameClick(wxCommandEvent& event)
+{
+    event.Skip();
+
+    int returnVal;
+    if (setup->savegameHasChanges)
+        returnVal = wxMessageBox(_("This will delete all changes you did.\n\nAre you sure you want to reload?"),
+                        _("Unsaved Changes"),
+                        wxYES_NO|wxCENTER,
+                        this);
+    else
+        returnVal = wxYES;
+
+    if (returnVal == wxYES)
+    {
+        loadSavegame();
+    }
+}
+
+void Courseplay_EditorFrame::OnBtnSaveSavegameClick(wxCommandEvent& event)
+{
+    if (data->saveSavegame())
+        setup->setSavegameHasChanges(false);
+}
+
+int Courseplay_EditorFrame::askToSave()
+{
+    return wxMessageBox(_("Do you want to save changes?"),
+                        _("Unsaved Changes"),
+                        wxYES_NO|wxCANCEL|wxCENTER,
+                        this);
+}

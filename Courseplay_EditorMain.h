@@ -12,6 +12,7 @@
 
 #include "wxPNGResource.h"
 #include "Variables.h"
+#include "DataHandler.h"
 
 //(*Headers(Courseplay_EditorFrame)
 #include <wx/scrolwin.h>
@@ -44,7 +45,12 @@ class Courseplay_EditorFrame: public wxFrame
         Courseplay_EditorFrame(wxWindow* parent,wxWindowID id = -1);
         virtual ~Courseplay_EditorFrame();
 
-        void updateToolbar2(void);
+        void updateToolbar2();
+        void updateSavegameList();
+
+        void loadSavegame();
+
+        int askToSave();
 
 
     public: // Event Functions
@@ -62,8 +68,8 @@ class Courseplay_EditorFrame: public wxFrame
     private: // Functions
 
     private: // Variables
-        Settings *settings;
-        wxString defaultLayout;
+        Settings        *setup;
+        DataHandler     *data;
 
         bool            courseListSelectedAll;
         bool            rightClickMenuOpen;
@@ -107,6 +113,9 @@ class Courseplay_EditorFrame: public wxFrame
         void OnRedoSelected(wxCommandEvent& event);
         void OnSettingsSelected(wxCommandEvent& event);
         void OnManualSelected(wxCommandEvent& event);
+        void OnSavegameSelected(wxCommandEvent& event);
+        void OnBtnReloadSavegameClick(wxCommandEvent& event);
+        void OnBtnSaveSavegameClick(wxCommandEvent& event);
         //*)
 
         //(*Identifiers(Courseplay_EditorFrame)

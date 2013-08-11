@@ -1,8 +1,13 @@
 #include "Settings.h"
 #include "Courseplay_EditorMain.h"
+#include "version.h"
+
+#define LayoutUpdateMajor 0
+#define LayoutUpdateMinor 0
+#define LayoutUpdateBuild 718
 
 Settings::Settings()
-        : Locale((wxConfig*) this)
+        : Locale(this)
 {
     setLocaleSearchPath(wxT("Langs"));
     setLocaleConfigPath(wxT("General"));
@@ -10,19 +15,43 @@ Settings::Settings()
 
     parent = NULL;
     defaultLayout = wxEmptyString;
+
+    savegameHasChanges = false;
+    loadLastSavegame = false;
+    backupSavegame = false;
+    savegameId = 0;
+    saveVersion = false;
+    major = 0;
+    minor = 0;
+    build = 0;
+
     configFrame = NULL;
 }
 
 Settings::Settings(Courseplay_EditorFrame *frame, wxAuiManager *m_mgr)
-        : Locale((wxConfig*) this)
+        : Locale(this)
 {
     setLocaleSearchPath(wxT("Langs"));
     setLocaleConfigPath(wxT("General"));
 
     parent = frame;
-    defaultLayout = wxEmptyString;
+    defaultLayout = m_mgr->SavePerspective();
+
+    savegameHasChanges = true;
+
+    saveVersion = true;
+    Read(wxT("/General/Major"), &major, EditorVersion::MAJOR);
+    Read(wxT("/General/Minor"), &minor, EditorVersion::MINOR);
+    Read(wxT("/General/Build"), &build, EditorVersion::BUILD);
 
     Read(wxT("/General/SelectedGame"), &selectedGameId, FS2013);
+    Read(wxT("/General/LoadLastSavegame"), &loadLastSavegame, false);
+    Read(wxT("/General/BackupSavegame"), &backupSavegame, true);
+
+    if (loadLastSavegame)
+        Read(wxT("/General/SavegameId"), &savegameId, 0);
+    else
+        savegameId = 0;
 
     for (int i = 0; i < NumOfFSGames; i++)
     {
@@ -39,6 +68,15 @@ Settings::~Settings()
     // Here for destructing things if needed.
     if (configFrame)
         delete configFrame;
+
+    if (saveVersion)
+    {
+        Write(_T("/General/Major"), EditorVersion::MAJOR);
+
+        Write(_T("/General/Minor"), EditorVersion::MINOR);
+
+        Write(_T("/General/Build"), EditorVersion::BUILD);
+    }
 }
 
 bool Settings::isFirstTimeSetup()
@@ -121,6 +159,8 @@ void Settings::doFirstTimeSetup()
 
 void Settings::showSettings()
 {
+    //(SettingsFrame*)configFrame->up
+    configFrame->updateTapPanels();
     configFrame->Show();
     configFrame->SetFocus();
 }
@@ -130,21 +170,43 @@ void Settings::saveDefaultLayout(wxString layout)
     defaultLayout = layout;
 }
 
-bool Settings::findInstallPath(FarmingSimulatorGames gameId)
+void Settings::saveLayout(wxString layout)
+{
+    Write(_T("GUI/layout"), layout);
+}
+
+wxString Settings::getSavedLayout()
+{
+    if (
+         major < LayoutUpdateMajor ||
+        (major <= LayoutUpdateMajor && minor < LayoutUpdateMinor) ||
+        (major <= LayoutUpdateMajor && minor <= LayoutUpdateMinor && build < LayoutUpdateBuild)
+       )
+    {
+        wxString msg = _("The layout have changed since last version.\n\nThe layout will be reset.");
+        wxMessageBox(msg, _("New Layout!"), wxOK | wxCENTER | wxICON_INFORMATION);
+        saveLayout(defaultLayout);
+        return defaultLayout;
+    }
+    else
+        return Read(_T("GUI/layout"), defaultLayout);
+}
+
+bool Settings::findInstallPath(FSGames gameId)
 {
     installPath[gameId] = doFindInstallPath(gameId);
 
     return (installPath[gameId] != wxEmptyString);
 }
 
-bool Settings::findSavegamePath(FarmingSimulatorGames gameId)
+bool Settings::findSavegamePath(FSGames gameId)
 {
     savegamePath[gameId] = doFindSavegamePath(gameId);
 
     return (savegamePath[gameId] != wxEmptyString);
 }
 
-void Settings::enableGame(FarmingSimulatorGames gameId, bool enable, bool updateToolbar)
+void Settings::enableGame(FSGames gameId, bool enable, bool updateToolbar)
 {
     Write(wxString::Format(_T("/%s/Enabled"), gameLocations[gameId].game.c_str()), enable);
     if (updateToolbar)
@@ -154,7 +216,7 @@ void Settings::enableGame(FarmingSimulatorGames gameId, bool enable, bool update
     }
 }
 
-void Settings::enableGameIfFound(FarmingSimulatorGames gameId, bool updateToolbar)
+void Settings::enableGameIfFound(FSGames gameId, bool updateToolbar)
 {
     // Set values
     wxString gameName = gameLocations[gameId].game;
@@ -166,19 +228,19 @@ void Settings::enableGameIfFound(FarmingSimulatorGames gameId, bool updateToolba
         enableGame(gameId, false, updateToolbar);
 }
 
-void Settings::setInstallPath(FarmingSimulatorGames gameId, wxString path)
+void Settings::setInstallPath(FSGames gameId, wxString path)
 {
     Write(wxString::Format(wxT("/%s/InstallLocation"), gameLocations[gameId].game.c_str()), path);
     installPath[gameId] = path;
 }
 
-void Settings::setSavegamePath(FarmingSimulatorGames gameId, wxString path)
+void Settings::setSavegamePath(FSGames gameId, wxString path)
 {
     Write(wxString::Format(wxT("/%s/SavegameLocation"), gameLocations[gameId].game.c_str()), path);
     savegamePath[gameId] = path;
 }
 
-bool Settings::setGameId(FarmingSimulatorGames gameId)
+bool Settings::setGameId(FSGames gameId)
 {
     if (gameId >= 0 && gameId < NumOfFSGames)
     {
@@ -213,4 +275,48 @@ void Settings::updateGameSelect()
 
         parent->updateToolbar2();
     }
+}
+
+void Settings::updateSavegameList()
+{
+    parent->updateSavegameList();
+}
+
+wxString Settings::getSavegamePath()
+{
+    if (selectedGameId >= 0)
+        return savegamePath[selectedGameId];
+
+    return wxEmptyString;
+}
+
+wxString Settings::getInstallPath()
+{
+    if (selectedGameId >= 0)
+        return installPath[selectedGameId];
+
+    return wxEmptyString;
+}
+
+void Settings::setSavegameHasChanges(bool val)
+{
+    savegameHasChanges = val;
+}
+
+void Settings::setLoadLastSavegame(bool val)
+{
+    loadLastSavegame = val;
+    Write(wxT("/General/LoadLastSavegame"), loadLastSavegame);
+}
+
+void Settings::setBackupSavegame(bool val)
+{
+    backupSavegame = val;
+    Write(wxT("/General/BackupSavegame"), backupSavegame);
+}
+
+void Settings::setSavegameId(long val)
+{
+    savegameId = val;
+    Write(wxT("/General/SavegameId"), savegameId);
 }

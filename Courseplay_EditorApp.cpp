@@ -54,3 +54,12 @@ bool Courseplay_EditorApp::OnInit()
 
     return wxsOK;
 }
+
+int Courseplay_EditorApp::OnExit()
+{
+#ifdef __WXDEBUGLOG__
+    if (logWindow)
+        delete logWindow;
+#endif
+    return 0;
+}

@@ -11,8 +11,8 @@ class CoreSettings : public wxConfig
         virtual ~CoreSettings();
 
         // Game Handling and path findings
-        wxString doFindInstallPath(FarmingSimulatorGames gameId);
-        wxString doFindSavegamePath(FarmingSimulatorGames gameId);
+        wxString doFindInstallPath(FSGames gameId);
+        wxString doFindSavegamePath(FSGames gameId);
 
         // Variables.
         GameSearchPaths gameLocations[NumOfFSGames];

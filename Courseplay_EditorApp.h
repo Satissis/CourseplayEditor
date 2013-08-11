@@ -16,7 +16,7 @@ class Courseplay_EditorApp : public wxApp
 {
     public:
         virtual bool OnInit();
-        //virtual int OnExit();
+        virtual int OnExit();
         //void RecreateGUI();
 
 #ifdef __WXDEBUGLOG__

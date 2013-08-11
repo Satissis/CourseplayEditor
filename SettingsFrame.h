@@ -29,7 +29,7 @@ class SettingsFrame: public wxFrame
 		SettingsFrame(Settings* conf, wxAuiManager *m_mgr, wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~SettingsFrame();
 
-		void autoDetectPath(FarmingSimulatorGames gameId);
+		void autoDetectPath(FSGames gameId);
 		void updateBtnFS11AutoDetect();
 		void updateBtnFS13AutoDetect();
 		bool updateLanguageList();
@@ -63,12 +63,14 @@ class SettingsFrame: public wxFrame
 		wxPanel* Panel1;
 		wxStaticBox* StaticBox6;
 		wxStaticText* StaticText1;
+		wxCheckBox* chkBackupSavegame;
 		wxStaticBox* StaticBox1;
+		wxStaticBox* StaticBox9;
 		wxButton* BtnFS2011InstallPath;
 		wxTextCtrl* FS11InstallPath;
 		wxCheckBox* ChkBoxFS13Enabled;
-		wxCheckBox* CheckBox1;
 		wxStaticBox* StaticBox2;
+		wxCheckBox* ChkLoadLastSavegame;
 		wxPanel* FS2013Settings;
 		wxCheckBox* ChkBoxFS11Enabled;
 		wxPanel* FS2011Settings;
@@ -85,7 +87,9 @@ class SettingsFrame: public wxFrame
 
 		//(*Identifiers(SettingsFrame)
 		static const long ID_STATICBOX8;
-		static const long ID_CHECKBOX1;
+		static const long ID_CHK_LOAD_LAST_SAVEGAME;
+		static const long ID_STATICBOX9;
+		static const long ID_CHK_BACKUP_SAVEGAME;
 		static const long ID_TAP_GENERAL;
 		static const long ID_STATICBOX2;
 		static const long ID_LANGLIST;
@@ -144,6 +148,8 @@ class SettingsFrame: public wxFrame
 		void OnBtnFS2013InstallPathClick(wxCommandEvent& event);
 		void OnBtnFS13SavePathClick(wxCommandEvent& event);
 		void OnBtnFS13AutoDetectClick(wxCommandEvent& event);
+		void OnChkLoadLastSavegameClick(wxCommandEvent& event);
+		void OnChkBackupSavegameClick(wxCommandEvent& event);
 		//*)
 
 		DECLARE_EVENT_TABLE()

@@ -14,7 +14,8 @@
 #include "SettingsFrame.h"
 #include "Locale.h"
 
-class Courseplay_EditorFrame;
+class Courseplay_EditorFrame;   // Dummy
+class SettingsFrame;            // Dummy
 
 class Settings : public CoreSettings, public Locale
 {
@@ -28,21 +29,37 @@ public: // Functions
 
     void showSettings();
     void saveDefaultLayout(wxString layout);
+    void saveLayout(wxString layout);
+    wxString getSavedLayout();
 
     // Game Handling and path findings
-    bool findInstallPath(FarmingSimulatorGames gameId);
-    bool findSavegamePath(FarmingSimulatorGames gameId);
-    void enableGame(FarmingSimulatorGames gameId, bool enable = true, bool updateToolbar = true);
-    void enableGameIfFound(FarmingSimulatorGames gameId, bool updateToolbar = true);
-    void setInstallPath(FarmingSimulatorGames gameId, wxString path = wxEmptyString);
-    void setSavegamePath(FarmingSimulatorGames gameId, wxString path = wxEmptyString);
+    bool findInstallPath(FSGames gameId);
+    bool findSavegamePath(FSGames gameId);
+    void enableGame(FSGames gameId, bool enable = true, bool updateToolbar = true);
+    void enableGameIfFound(FSGames gameId, bool updateToolbar = true);
+    void setInstallPath(FSGames gameId, wxString path = wxEmptyString);
+    void setSavegamePath(FSGames gameId, wxString path = wxEmptyString);
 
-    bool setGameId(FarmingSimulatorGames gameId);
+    bool setGameId(FSGames gameId);
+
+    void setSavegameHasChanges(bool val = true);
+
+    wxString getSavegamePath();
+    wxString getInstallPath();
+
+    void updateSavegameList();
+    void setLoadLastSavegame(bool val);
+    void setBackupSavegame(bool val);
+    void setSavegameId(long val);
 
 public: // Variables
     bool        gameIsEnabled[NumOfFSGames];
+    bool        savegameHasChanges;
+    bool        loadLastSavegame;
+    bool        backupSavegame;
 
     long        selectedGameId;
+    long        savegameId;
 
     wxString    defaultLayout;
     wxString    installPath[NumOfFSGames];
@@ -50,7 +67,12 @@ public: // Variables
 
 protected: // Variables
     Courseplay_EditorFrame  *parent;
-    wxFrame                 *configFrame;
+    SettingsFrame           *configFrame;
+
+    bool saveVersion;
+    long major;
+    long minor;
+    long build;
 
 private: // Functions
     void updateGameSelect();
